@@ -2,6 +2,19 @@
 
 ## English
 
+### ✅ Done — KPIs, search, cost & pickup date, realistic data
+- **Dashboard KPIs**: clientes registrados, equipos recibidos, reparaciones
+  activas, reparaciones completadas, and average turnaround (tiempo promedio, in
+  días) computed live from the data.
+- **Search** on the orders list: by customer name, order code, or device
+  brand/model (e.g. "Vargas" or "REP-2026-0020").
+- **Estimated cost (Bs)** and **estimated pickup date** on every order — captured
+  in the intake form, editable from the detail page, and shown on the detail page,
+  the public status page, and the PDF receipt.
+- **Realistic Rurrenabaque demo data**: 38 customers (incl. Imprenta Don Pepe,
+  Radio San Miguel, Hotel Maya de la Amazonía…), 72 devices, 72 orders
+  (~58 completed, ~14 active) with costs, dates, and full history.
+
 ### ✅ Done — Order detail, QR codes, PDF receipt
 - **Order detail page** (`/admin/ordenes/[id]`): customer, phone, device, serial,
   problem, priority, status, assigned technician, and a **history timeline with
@@ -79,6 +92,19 @@
 ---
 
 ## Español
+
+### ✅ Hecho — Indicadores, búsqueda, costo y fecha de entrega, datos reales
+- **Indicadores del panel**: clientes registrados, equipos recibidos,
+  reparaciones activas, reparaciones completadas y tiempo promedio (en días),
+  calculados en vivo a partir de los datos.
+- **Búsqueda** en la lista de órdenes: por nombre del cliente, código de orden o
+  marca/modelo del equipo (p. ej. "Vargas" o "REP-2026-0020").
+- **Costo estimado (Bs)** y **fecha estimada de entrega** en cada orden:
+  capturados en el formulario de recepción, editables desde el detalle, y
+  mostrados en el detalle, la página pública de estado y el comprobante PDF.
+- **Datos de demostración realistas de Rurrenabaque**: 38 clientes (incl.
+  Imprenta Don Pepe, Radio San Miguel, Hotel Maya de la Amazonía…), 72 equipos,
+  72 órdenes (~58 completadas, ~14 activas) con costos, fechas e historial.
 
 ### ✅ Hecho — Detalle de orden, códigos QR, comprobante PDF
 - **Página de detalle de orden** (`/admin/ordenes/[id]`): cliente, teléfono,

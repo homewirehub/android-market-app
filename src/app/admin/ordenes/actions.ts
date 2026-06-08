@@ -14,6 +14,20 @@ function str(form: FormData, key: string): string {
   return (form.get(key) ?? "").toString().trim();
 }
 
+function num(form: FormData, key: string): number | null {
+  const v = str(form, key).replace(",", ".");
+  if (!v) return null;
+  const n = Number.parseFloat(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function date(form: FormData, key: string): Date | null {
+  const v = str(form, key); // expects yyyy-mm-dd from <input type="date">
+  if (!v) return null;
+  const d = new Date(`${v}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 function isStatus(value: string): value is RepairStatus {
   return (STATUS_ORDER as string[]).includes(value);
 }
@@ -40,10 +54,18 @@ export async function updateOrderStatus(formData: FormData) {
   if (!orderId || !isStatus(statusRaw)) return;
   const status = statusRaw;
 
+  const estimatedCost = num(formData, "estimatedCost");
+  const estimatedReadyAt = date(formData, "estimatedReadyAt");
+
   await prisma.$transaction(async (tx) => {
     await tx.repairOrder.update({
       where: { id: orderId },
-      data: { status, closedAt: status === "DELIVERED" ? new Date() : null },
+      data: {
+        status,
+        closedAt: status === "DELIVERED" ? new Date() : null,
+        ...(estimatedCost !== null ? { estimatedCost } : {}),
+        ...(estimatedReadyAt !== null ? { estimatedReadyAt } : {}),
+      },
     });
     await tx.repairStatusHistory.create({
       data: {
@@ -120,6 +142,8 @@ export async function createIntakeOrder(formData: FormData) {
             description,
             priority,
             status,
+            estimatedCost: num(formData, "estimatedCost"),
+            estimatedReadyAt: date(formData, "estimatedReadyAt"),
             closedAt: status === "DELIVERED" ? new Date() : null,
             history: {
               create: {

@@ -4,7 +4,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { prisma } from "@/lib/prisma";
 import { statusUrl } from "@/lib/appUrl";
 import { qrPngBuffer } from "@/lib/qr";
-import { statusLabel, priorityLabel } from "@/lib/labels";
+import { statusLabel, priorityLabel, formatBs, formatDateShort } from "@/lib/labels";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -96,6 +96,8 @@ export async function GET(
     ["Problema", pdfText(order.description)],
     ["Prioridad", pdfText(priorityLabel(order.priority))],
     ["Estado", pdfText(statusLabel(order.status))],
+    ["Costo estimado", pdfText(formatBs(order.estimatedCost))],
+    ["Entrega estimada", pdfText(formatDateShort(order.estimatedReadyAt))],
     [
       "Fecha de ingreso",
       pdfText(order.createdAt.toLocaleString("es-BO", { dateStyle: "long", timeStyle: "short" })),
