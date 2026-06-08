@@ -123,3 +123,61 @@ export const MoneyIcon = (p: IconProps) => (
     <path d="M6 9v6M18 9v6" />
   </svg>
 );
+
+// Service icons for the landing page.
+export const PhoneIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
+    <path d="M10.5 18.5h3" />
+  </svg>
+);
+
+export const BatteryIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="3" y="8" width="15" height="8" rx="1.5" />
+    <path d="M21 11v2" />
+    <path d="M6 11v2" />
+  </svg>
+);
+
+export const PlugIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 22v-5" />
+    <path d="M9 7V3M15 7V3" />
+    <path d="M7 7h10v3a5 5 0 0 1-10 0V7Z" />
+  </svg>
+);
+
+export const ShieldIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z" />
+  </svg>
+);
+
+export const CodeIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="m9 8-4 4 4 4M15 8l4 4-4 4" />
+  </svg>
+);
+
+export const SparklesIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M12 4l1.6 4.4L18 10l-4.4 1.6L12 16l-1.6-4.4L6 10l4.4-1.6L12 4Z" />
+    <path d="M18 14l.8 2.2L21 17l-2.2.8L18 20l-.8-2.2L15 17l2.2-.8L18 14Z" />
+  </svg>
+);
+
+export const LockOpenIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <rect x="5" y="11" width="14" height="9" rx="2" />
+    <path d="M8 11V7a4 4 0 0 1 7.5-2" />
+  </svg>
+);
+
+export const StethoscopeIcon = (p: IconProps) => (
+  <svg {...base(p)}>
+    <path d="M5 3v5a4 4 0 0 0 8 0V3" />
+    <path d="M9 16a5 5 0 0 0 10 0v-2" />
+    <circle cx="19" cy="11" r="2" />
+  </svg>
+);
