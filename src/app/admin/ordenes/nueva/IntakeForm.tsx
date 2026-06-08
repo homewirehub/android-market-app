@@ -50,9 +50,14 @@ export function IntakeForm({
 
         {isNew ? (
           <div className="space-y-4 rounded-lg border border-dashed border-zinc-300 p-4 dark:border-zinc-700">
-            <Field label="Nombre completo" htmlFor="newCustomerName" required>
-              <input id="newCustomerName" name="newCustomerName" className={fieldClass} />
-            </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Nombre completo" htmlFor="newCustomerName" required>
+                <input id="newCustomerName" name="newCustomerName" className={fieldClass} />
+              </Field>
+              <Field label="C.I. (opcional)" htmlFor="newCustomerCi">
+                <input id="newCustomerCi" name="newCustomerCi" className={fieldClass} />
+              </Field>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Teléfono" htmlFor="newCustomerPhone">
                 <input
@@ -96,8 +101,11 @@ export function IntakeForm({
               <option value="Otro">Otro</option>
             </select>
           </Field>
-          <Field label="N.º de serie" htmlFor="serialNumber">
+          <Field label="IMEI / N.º de serie" htmlFor="serialNumber">
             <input id="serialNumber" name="serialNumber" className={fieldClass} />
+          </Field>
+          <Field label="Accesorios recibidos" htmlFor="accessories">
+            <input id="accessories" name="accessories" className={fieldClass} placeholder="Solo equipo, cargador…" />
           </Field>
           <Field label="Marca" htmlFor="brand" required>
             <input id="brand" name="brand" required className={fieldClass} placeholder="HP, Samsung…" />

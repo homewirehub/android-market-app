@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, StatusBadge, LinkButton } from "@/components/ui";
-import { STATUS_ORDER, STATUS_DOT } from "@/lib/labels";
+import { STATUS_ORDER, STATUS_DOT, formatBs } from "@/lib/labels";
 import { PlusIcon } from "@/components/icons";
 import type { RepairStatus } from "@prisma/client";
 
@@ -17,7 +17,7 @@ const ACTIVE_STATUSES: RepairStatus[] = [
 ];
 
 export default async function AdminDashboardPage() {
-  const [customers, devices, byStatus, delivered] = await Promise.all([
+  const [customers, devices, byStatus, delivered, income] = await Promise.all([
     prisma.customer.count(),
     prisma.device.count(),
     prisma.repairOrder.groupBy({ by: ["status"], _count: { _all: true } }),
@@ -25,6 +25,7 @@ export default async function AdminDashboardPage() {
       where: { status: "DELIVERED", closedAt: { not: null } },
       select: { createdAt: true, closedAt: true },
     }),
+    prisma.payment.aggregate({ where: { status: "PAID" }, _sum: { totalBs: true } }),
   ]);
 
   const statusCounts = new Map<RepairStatus, number>(
@@ -51,6 +52,7 @@ export default async function AdminDashboardPage() {
     { label: "Reparaciones activas", value: activas, href: "/admin/ordenes", accent: true },
     { label: "Reparaciones completadas", value: completadas, href: "/admin/ordenes" },
     { label: "Tiempo promedio", value: `${avgDaysLabel} días`, href: null },
+    { label: "Ingresos cobrados", value: formatBs(income._sum.totalBs ?? 0), href: "/admin/reportes" },
   ];
 
   return (
@@ -66,7 +68,7 @@ export default async function AdminDashboardPage() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         {kpis.map((kpi) => {
           const inner = (
             <Card className="h-full p-5 transition-shadow hover:shadow-md">
