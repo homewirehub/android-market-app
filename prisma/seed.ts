@@ -1,144 +1,143 @@
-// Seed script: realistic demo data for Android Market (Rurrenabaque, Beni).
-// Phone-focused repair shop. Includes spare-parts inventory, parts used per
-// order, and payments — matching the academic proposal + Excel data model.
+// Seed script: a faithful reproduction of the shop's real data
+// (Excel "TRABAJO GRUPAL"): 20 clientes, 20 equipos, 2 técnicos, 20 órdenes,
+// 55 repuestos with inventory, parts used per order, and payments.
 // Run via `npm run db:seed` (or automatically by `npm run db:reset`).
-import {
-  PrismaClient,
-  RepairStatus,
-  Priority,
-  PaymentMethod,
-} from "@prisma/client";
+import { PrismaClient, RepairStatus, PaymentMethod } from "@prisma/client";
 
 const prisma = new PrismaClient();
-
-// Deterministic PRNG (mulberry32) so the demo data is stable across runs.
-function mulberry32(seed: number) {
-  return function () {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-const rand = mulberry32(20260608);
-const randInt = (min: number, max: number) => Math.floor(rand() * (max - min + 1)) + min;
-const pick = <T>(arr: T[]): T => arr[Math.floor(rand() * arr.length)];
-const round10 = (n: number) => Math.round(n / 10) * 10;
-function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(rand() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 const DAY = 24 * 60 * 60 * 1000;
-const STATUS_FLOW: RepairStatus[] = [
-  "NEW",
-  "DIAGNOSIS",
-  "WAITING_FOR_PARTS",
-  "REPAIRING",
-  "COMPLETED",
-  "DELIVERED",
+
+// --- Técnicos (Excel: TEC_01 Carlos Paz, TEC_02 Efraín Mayta) ------------
+const TECS = [
+  { name: "Carlos Paz Maita", specialization: "Software y hardware", phone: "+591 72500001" },
+  { name: "Efraín Mayta", specialization: "Software y hardware", phone: "+591 72500002" },
 ];
 
-const ZONES = [
-  "Los Sauces",
-  "Los Cedros",
-  "Centro",
-  "3 de Mayo",
-  "16 de Julio",
-  "Puerto Motor",
-  "Villa Lourdes",
-  "Isla Grande",
-  "Penocos",
-  "Ambaibos",
-  "Siringal",
-];
-const NOTES = ["Cliente frecuente", "Solo por WhatsApp", "Tiene garantía", null, null];
-const phone = () => `+591 ${pick(["7", "6"])}${randInt(1000000, 9999999)}`;
-
-const CUSTOMERS = [
-  "Juan Vargas", "María Limpias", "Carlos Suárez", "Rosa Mamani", "Pedro Justiniano",
-  "Martín Laura", "Sebastián Loza", "Edmar Gonzales", "Mario Tipuni", "Luz Puro",
-  "Nayeli Villegas", "Jorge Ququi", "Andry Vargas", "Marianela Vaca", "Dina Chao",
-  "Dayana Queteguari", "Milton Flores", "Marianela Gómez", "Cecilio Vásquez",
-  "Vladimir Palomeque", "Claritza Suárez", "Deimer Velázquez", "Edson Guzmán",
-  "Fernanda Mamani", "Ana Roca", "Luis Moreno", "Gabriela Áñez", "Teresa Flores",
-  // Businesses
-  "Imprenta Don Pepe SRL", "Radio San Miguel", "Hotel Maya de la Amazonía",
-  "Farmacia Bolívar", "Internet Café Amazonas", "Colegio San Lorenzo",
-  "Restaurante El Tacuara", "Madidi Travel", "Ferretería La Económica", "Pensión Beni",
-];
-
-// Phone catalog (brand -> models), aligned with the shop's real devices.
-const PHONES: { brand: string; models: string[] }[] = [
-  { brand: "Samsung", models: ["Galaxy A10", "Galaxy A11", "Galaxy A12", "Galaxy A13", "Galaxy A20", "Galaxy A30", "Galaxy A50", "Galaxy A14", "Galaxy S21"] },
-  { brand: "Xiaomi", models: ["Redmi 9", "Redmi Note 9 Pro", "Redmi Note 10 Pro", "Redmi Note 13", "Redmi A5"] },
-  { brand: "Tecno", models: ["Pova 5", "Spark Go 2024", "Spark Go 2023"] },
-  { brand: "Huawei", models: ["P30 Lite", "Y9 2019"] },
-  { brand: "Infinix", models: ["Note 30"] },
-  { brand: "Motorola", models: ["Moto G73"] },
-  { brand: "Apple", models: ["iPhone 11", "iPhone 12"] },
-];
-const ACCESSORIES = ["Solo equipo", "Con cargador", "Con funda", "Con cargador y funda"];
-
-// Services: labor range (Bs) + spare-part category needed (null = software).
-type Service = { falla: string; trabajo: string; cat: string | null; labor: [number, number] };
-const SERVICES: Service[] = [
-  { falla: "Pantalla rota", trabajo: "Cambio de pantalla", cat: "Pantalla", labor: [30, 80] },
-  { falla: "No carga la batería", trabajo: "Cambio de batería", cat: "Batería", labor: [30, 60] },
-  { falla: "Carcasa dañada", trabajo: "Cambio de tapa", cat: "Tapa", labor: [20, 50] },
-  { falla: "No carga / pin dañado", trabajo: "Cambio de pin de carga", cat: "Módulo de carga", labor: [30, 60] },
-  { falla: "Equipo bloqueado / lento", trabajo: "Flasheo de software", cat: null, labor: [60, 100] },
-  { falla: "Bloqueo por operador", trabajo: "Liberación de operador", cat: null, labor: [100, 150] },
-  { falla: "Equipo con humedad", trabajo: "Limpieza interna", cat: null, labor: [30, 50] },
-];
-
-// Spare parts taken from the shop's real list (Excel).
-const SPARE_PARTS: { name: string; category: string; priceBs: number; base: number; min: number }[] = [
-  // Pantallas
-  { name: "Pantalla Tecno Spark Go 2023", category: "Pantalla", priceBs: 140, base: 5, min: 2 },
-  { name: "Pantalla Tecno Spark Go 2024", category: "Pantalla", priceBs: 150, base: 4, min: 2 },
-  { name: "Pantalla Samsung A50", category: "Pantalla", priceBs: 170, base: 5, min: 2 },
-  { name: "Pantalla Samsung A12", category: "Pantalla", priceBs: 180, base: 5, min: 2 },
-  { name: "Pantalla Samsung A10", category: "Pantalla", priceBs: 150, base: 3, min: 2 },
-  { name: "Pantalla Samsung A30", category: "Pantalla", priceBs: 180, base: 4, min: 2 },
-  { name: "Pantalla Samsung A11", category: "Pantalla", priceBs: 180, base: 4, min: 2 },
-  { name: "Pantalla Samsung A13", category: "Pantalla", priceBs: 160, base: 3, min: 2 },
-  { name: "Pantalla Xiaomi Redmi Note 10 Pro", category: "Pantalla", priceBs: 220, base: 3, min: 2 },
-  { name: "Pantalla Xiaomi Redmi Note 9 Pro", category: "Pantalla", priceBs: 180, base: 3, min: 2 },
-  { name: "Pantalla Xiaomi Redmi 9", category: "Pantalla", priceBs: 160, base: 3, min: 2 },
-  { name: "Pantalla Huawei Y9 2019", category: "Pantalla", priceBs: 150, base: 2, min: 2 },
-  { name: "Pantalla Huawei P30 Lite", category: "Pantalla", priceBs: 180, base: 2, min: 2 },
-  { name: "Pantalla Infinix Note 30", category: "Pantalla", priceBs: 190, base: 4, min: 2 },
-  { name: "Pantalla Xiaomi Redmi A5", category: "Pantalla", priceBs: 180, base: 2, min: 2 },
-  // Baterías
-  { name: "Batería Samsung A02", category: "Batería", priceBs: 120, base: 3, min: 2 },
-  { name: "Batería Samsung A12", category: "Batería", priceBs: 130, base: 4, min: 2 },
-  { name: "Batería Tecno Spark Go 2024", category: "Batería", priceBs: 130, base: 3, min: 2 },
-  { name: "Batería Tecno Pova 5", category: "Batería", priceBs: 160, base: 3, min: 2 },
-  { name: "Batería Xiaomi Redmi Note 13", category: "Batería", priceBs: 130, base: 3, min: 2 },
-  { name: "Batería Infinix Note 30", category: "Batería", priceBs: 180, base: 3, min: 2 },
-  // Tapas
-  { name: "Tapa Samsung A10", category: "Tapa", priceBs: 70, base: 10, min: 3 },
-  { name: "Tapa Samsung A12", category: "Tapa", priceBs: 70, base: 10, min: 3 },
-  { name: "Tapa Samsung A11", category: "Tapa", priceBs: 60, base: 10, min: 3 },
-  { name: "Tapa Huawei P30 Lite", category: "Tapa", priceBs: 60, base: 8, min: 3 },
-  { name: "Tapa Xiaomi Redmi Note 10 Pro", category: "Tapa", priceBs: 60, base: 8, min: 3 },
-  { name: "Tapa Samsung A30", category: "Tapa", priceBs: 50, base: 10, min: 3 },
-  { name: "Tapa Tecno Spark Go 2024", category: "Tapa", priceBs: 40, base: 10, min: 3 },
-  // Módulos de carga
-  { name: "Módulo de carga Samsung A50", category: "Módulo de carga", priceBs: 35, base: 5, min: 2 },
-  { name: "Módulo de carga Samsung A10", category: "Módulo de carga", priceBs: 25, base: 5, min: 2 },
-  { name: "Módulo de carga Tecno Spark Go 2024", category: "Módulo de carga", priceBs: 35, base: 5, min: 2 },
-  { name: "Módulo de carga Samsung A11", category: "Módulo de carga", priceBs: 25, base: 5, min: 2 },
-  { name: "Módulo de carga Huawei Y9 2019", category: "Módulo de carga", priceBs: 30, base: 5, min: 2 },
-  { name: "Módulo de carga Infinix Note 30", category: "Módulo de carga", priceBs: 45, base: 4, min: 2 },
+// --- Repuestos + inventario (Excel: REPUESTO + INVENTARIO_REPUESTO) -------
+// [name, category, priceBs, stock (= entrada), stockMin]
+const SPARE: [string, string, number, number, number][] = [
+  ["Pantalla Tecno Spark Go 2023", "Pantalla", 140, 5, 2], // REPS-001
+  ["Pantalla Tecno Spark Go 2024", "Pantalla", 150, 5, 2],
+  ["Pantalla Samsung A50", "Pantalla", 170, 5, 2],
+  ["Pantalla Samsung A12", "Pantalla", 180, 5, 2],
+  ["Pantalla Samsung A10", "Pantalla", 150, 5, 2],
+  ["Pantalla Samsung A30", "Pantalla", 180, 5, 2],
+  ["Pantalla Samsung A11", "Pantalla", 180, 5, 2],
+  ["Pantalla Xiaomi Redmi Note 10 Pro", "Pantalla", 220, 5, 2],
+  ["Pantalla Samsung A13", "Pantalla", 160, 3, 2],
+  ["Pantalla Xiaomi Redmi Note 9 Pro", "Pantalla", 180, 3, 2],
+  ["Pantalla Xiaomi Redmi 9", "Pantalla", 160, 3, 2],
+  ["Pantalla Xiaomi Redmi Note 10 Pro (v2)", "Pantalla", 190, 3, 2],
+  ["Pantalla Huawei Y5", "Pantalla", 120, 3, 2],
+  ["Pantalla Huawei Y6", "Pantalla", 140, 3, 2],
+  ["Pantalla Huawei Y7", "Pantalla", 160, 3, 2],
+  ["Pantalla Huawei Y9 2019", "Pantalla", 150, 2, 2],
+  ["Pantalla Huawei P30 Lite", "Pantalla", 180, 2, 2],
+  ["Pantalla Infinix Note 30", "Pantalla", 190, 4, 2],
+  ["Pantalla Infinix Note 30 Pro", "Pantalla", 250, 4, 2],
+  ["Pantalla Infinix Note 40 Pro", "Pantalla", 380, 4, 2],
+  ["Batería Samsung A02", "Batería", 120, 3, 2],
+  ["Batería Samsung A12", "Batería", 130, 3, 2],
+  ["Batería Tecno Spark Go 2024", "Batería", 130, 3, 2],
+  ["Batería Tecno Pova 5", "Batería", 160, 3, 2],
+  ["Batería Tecno Pova 2", "Batería", 150, 3, 2],
+  ["Batería Samsung J5", "Batería", 50, 3, 2],
+  ["Batería Samsung J7", "Batería", 70, 3, 2],
+  ["Batería Xiaomi Redmi Note 13", "Batería", 130, 3, 2],
+  ["Batería Infinix Note 50 Pro", "Batería", 180, 3, 2],
+  ["Tapa Samsung A10", "Tapa", 70, 10, 3],
+  ["Tapa Samsung A12", "Tapa", 70, 10, 3],
+  ["Tapa Samsung A11", "Tapa", 60, 10, 3],
+  ["Tapa Huawei P20 Lite", "Tapa", 50, 10, 3],
+  ["Tapa Huawei P30 Lite", "Tapa", 60, 10, 3],
+  ["Tapa Xiaomi Redmi Note 10 Pro", "Tapa", 60, 10, 3],
+  ["Tapa Samsung A30", "Tapa", 50, 10, 3],
+  ["Tapa Samsung A50", "Tapa", 50, 10, 3],
+  ["Tapa Samsung A20s", "Tapa", 50, 10, 3],
+  ["Tapa Tecno Spark Go 2024", "Tapa", 40, 10, 3],
+  ["Tapa Samsung A56", "Tapa", 60, 10, 3],
+  ["Tapa Samsung A10s", "Tapa", 50, 10, 3],
+  ["Tapa Huawei Y9 Prime", "Tapa", 60, 10, 3],
+  ["Tapa Huawei P40 Lite", "Tapa", 60, 10, 3],
+  ["Módulo de carga Samsung A50", "Módulo de carga", 35, 5, 2],
+  ["Módulo de carga Samsung A10", "Módulo de carga", 25, 5, 2],
+  ["Módulo de carga Tecno Spark Go 2023", "Módulo de carga", 35, 5, 2],
+  ["Módulo de carga Tecno Spark Go 2024", "Módulo de carga", 35, 5, 2],
+  ["Módulo de carga Samsung A11", "Módulo de carga", 25, 5, 2],
+  ["Módulo de carga Samsung A13", "Módulo de carga", 30, 5, 2],
+  ["Módulo de carga Huawei Y5", "Módulo de carga", 25, 5, 2],
+  ["Módulo de carga Huawei Y6", "Módulo de carga", 30, 5, 2],
+  ["Módulo de carga Huawei Y7", "Módulo de carga", 35, 5, 2],
+  ["Módulo de carga Infinix Note 30 Pro", "Módulo de carga", 45, 5, 2],
+  ["Módulo de carga Infinix Note 40 Pro", "Módulo de carga", 50, 5, 2],
+  ["Pantalla Xiaomi Redmi A5", "Pantalla", 180, 2, 2], // REPS-055
 ];
 
+// --- Clientes + equipos (Excel: CLIENTES + EQUIPOS) ----------------------
+// [name, phone, zone, note, brand, model]
+const CLIENTS: [string, string, string, string, string, string][] = [
+  ["Martín Laura", "72565282", "Los Sauces", "Cliente frecuente", "Tecno", "Pova 5"],
+  ["Sebastián Loza", "72540528", "Los Sauces", "Solo por WhatsApp", "Samsung", "Galaxy A50"],
+  ["Edmar Gonzales", "69564663", "Los Cedros", "Cliente frecuente", "Infinix", "Note 30"],
+  ["Mario Tipuni", "60406633", "Centro", "Cliente frecuente", "Huawei", "P30 Lite"],
+  ["Luz Puro", "67363377", "3 de Mayo", "Cliente frecuente", "Tecno", "Spark Go 2024"],
+  ["Nayeli Villegas", "67443020", "16 de Julio", "Cliente frecuente", "Huawei", "Y9 2019"],
+  ["Jorge Ququi", "67994420", "Puerto Motor", "Solo por WhatsApp", "Samsung", "Galaxy A20"],
+  ["Andry Vargas", "72549234", "Los Sauces", "Tiene garantía", "Samsung", "Galaxy A30"],
+  ["Ashley", "69206998", "Centro", "Solo por WhatsApp", "Samsung", "Galaxy A10"],
+  ["Marianela Vaca", "67894353", "Villa Lourdes", "Solo por WhatsApp", "Samsung", "Galaxy A30s"],
+  ["Dina Chao", "67854354", "3 de Mayo", "Cliente frecuente", "Samsung", "Galaxy A12"],
+  ["Dayana Queteguari", "67543467", "3 de Mayo", "Cliente frecuente", "Samsung", "Galaxy A11"],
+  ["Milton Flores", "68453244", "Isla Grande", "Solo por WhatsApp", "Samsung", "Galaxy A13"],
+  ["Marianela Gómez", "77754532", "Isla Grande", "Cliente frecuente", "Xiaomi", "Redmi Note 9 Pro"],
+  ["Cecilio Vásquez", "69697743", "Los Sauces", "Solo por WhatsApp", "Xiaomi", "Redmi Note 10 Pro"],
+  ["Vladimir Palomeque", "73964041", "Penocos", "Cliente frecuente", "Xiaomi", "Redmi Note 13"],
+  ["Claritza Suárez", "63273350", "Penocos", "Cliente frecuente", "Xiaomi", "Redmi 9"],
+  ["Deimer Velázquez", "73920586", "Penocos", "Cliente frecuente", "Xiaomi", "Redmi Note 10 Pro"],
+  ["Edson Guzmán", "69454083", "Ambaibos", "Cliente frecuente", "Xiaomi", "Redmi A5"],
+  ["Fernanda Mamani", "73922751", "Siringal", "Cliente frecuente", "Tecno", "Spark Go 2023"],
+];
+
+// --- Órdenes (Excel: ORDEN_SERVICIO + DIAGNOSTICO + DETALLE + PAGOS) ------
+// tec: 0=Carlos, 1=Efraín · estado · falla · costo(mano de obra) · part(REPS# or 0)
+// · forma · descuento(fracción)
+type O = {
+  tec: 0 | 1;
+  estado: "Terminado" | "En reparacion" | "Recibido";
+  falla: string;
+  costo: number;
+  part: number; // 1-based REPS index, 0 = none
+  forma: "Efectivo" | "QR";
+  desc: number;
+};
+const ORDERS: O[] = [
+  { tec: 1, estado: "Terminado", falla: "Equipo lento — flasheo de software", costo: 80, part: 0, forma: "Efectivo", desc: 0 },
+  { tec: 0, estado: "Terminado", falla: "Equipo lento — flasheo de software", costo: 60, part: 0, forma: "Efectivo", desc: 0 },
+  { tec: 0, estado: "Terminado", falla: "Bloqueo de operador — liberación", costo: 150, part: 0, forma: "Efectivo", desc: 0 },
+  { tec: 0, estado: "Terminado", falla: "Pantalla rota — cambio de pantalla", costo: 150, part: 17, forma: "Efectivo", desc: 0 },
+  { tec: 0, estado: "Terminado", falla: "Carcasa dañada — cambio de tapa", costo: 50, part: 39, forma: "QR", desc: 0 },
+  { tec: 0, estado: "En reparacion", falla: "Pantalla rota — cambio de pantalla", costo: 160, part: 16, forma: "QR", desc: 0.1 },
+  { tec: 0, estado: "En reparacion", falla: "Equipo lento — flasheo de software", costo: 80, part: 0, forma: "Efectivo", desc: 0 },
+  { tec: 1, estado: "Terminado", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 6, forma: "Efectivo", desc: 0 },
+  { tec: 1, estado: "Terminado", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 5, forma: "Efectivo", desc: 0 },
+  { tec: 1, estado: "Terminado", falla: "Liberación de país", costo: 30, part: 0, forma: "QR", desc: 0 },
+  { tec: 1, estado: "En reparacion", falla: "Batería defectuosa — cambio de batería", costo: 30, part: 22, forma: "Efectivo", desc: 0 },
+  { tec: 0, estado: "Recibido", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 7, forma: "Efectivo", desc: 0.15 },
+  { tec: 1, estado: "En reparacion", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 9, forma: "Efectivo", desc: 0 },
+  { tec: 1, estado: "Recibido", falla: "Bloqueo de cuenta — cambio de email", costo: 30, part: 0, forma: "QR", desc: 0 },
+  { tec: 1, estado: "Recibido", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 12, forma: "QR", desc: 0 },
+  { tec: 1, estado: "Recibido", falla: "Batería defectuosa — cambio de batería", costo: 30, part: 28, forma: "QR", desc: 0 },
+  { tec: 0, estado: "Recibido", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 11, forma: "Efectivo", desc: 0 },
+  { tec: 1, estado: "Recibido", falla: "Carcasa dañada — cambio de tapa", costo: 30, part: 35, forma: "Efectivo", desc: 0 },
+  { tec: 1, estado: "Recibido", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 55, forma: "Efectivo", desc: 0 },
+  { tec: 0, estado: "Recibido", falla: "Pantalla rota — cambio de pantalla", costo: 30, part: 1, forma: "Efectivo", desc: 0 },
+];
+
+const STATUS_MAP: Record<O["estado"], RepairStatus> = {
+  Terminado: "DELIVERED",
+  "En reparacion": "REPAIRING",
+  Recibido: "NEW",
+};
 const HISTORY_NOTE: Record<RepairStatus, string> = {
   NEW: "Equipo recibido en recepción.",
   DIAGNOSIS: "Equipo en diagnóstico técnico.",
@@ -150,7 +149,6 @@ const HISTORY_NOTE: Record<RepairStatus, string> = {
 };
 
 async function main() {
-  // Clean slate (children first) so `db:seed` is safely repeatable on its own.
   await prisma.payment.deleteMany();
   await prisma.orderPart.deleteMany();
   await prisma.repairStatusHistory.deleteMany();
@@ -160,203 +158,94 @@ async function main() {
   await prisma.technician.deleteMany();
   await prisma.sparePart.deleteMany();
 
-  // --- Technicians -------------------------------------------------------
-  const technicians = await Promise.all(
-    [
-      { name: "Carlos Paz Maita", specialization: "Software y hardware", phone: phone() },
-      { name: "Efraín Mayta", specialization: "Software y hardware", phone: phone() },
-      { name: "Daniela Mamani Choque", specialization: "Microsoldadura", phone: phone() },
-    ].map((data) => prisma.technician.create({ data })),
-  );
+  const technicians = await Promise.all(TECS.map((data) => prisma.technician.create({ data })));
 
-  // --- Spare parts (inventory) ------------------------------------------
   const spareParts = await Promise.all(
-    SPARE_PARTS.map((p, i) =>
+    SPARE.map(([name, category, priceBs, stock, stockMin], i) =>
       prisma.sparePart.create({
-        data: {
-          code: `REPS-${String(i + 1).padStart(3, "0")}`,
-          name: p.name,
-          category: p.category,
-          priceBs: p.priceBs,
-          stock: p.base,
-          stockMin: p.min,
-        },
-      }),
-    ),
-  );
-  const partsByCategory = new Map<string, typeof spareParts>();
-  for (const sp of spareParts) {
-    const list = partsByCategory.get(sp.category) ?? [];
-    list.push(sp);
-    partsByCategory.set(sp.category, list);
-  }
-  const usedCount = new Map<string, number>(); // sparePartId -> units used
-
-  // --- Customers ---------------------------------------------------------
-  const customers = await Promise.all(
-    CUSTOMERS.map((name) =>
-      prisma.customer.create({
-        data: {
-          name,
-          ci: rand() > 0.5 ? String(randInt(3000000, 9999999)) : null,
-          phone: phone(),
-          email: rand() > 0.7 ? `${name.split(" ")[0].toLowerCase()}@gmail.com` : null,
-          address: `${pick(ZONES)}, Rurrenabaque, Beni`,
-          note: pick(NOTES),
-        },
+        data: { code: `REPS-${String(i + 1).padStart(3, "0")}`, name, category, priceBs, stock, stockMin },
       }),
     ),
   );
 
-  // --- Devices (~72 phones) ---------------------------------------------
-  const DEVICE_COUNT = 72;
+  // Customers + their single device.
   const devices = [];
-  for (let i = 0; i < DEVICE_COUNT; i++) {
-    const customer = customers[i % customers.length];
-    const entry = pick(PHONES);
+  for (const [name, phone, zone, note, brand, model] of CLIENTS) {
+    const customer = await prisma.customer.create({
+      data: { name, phone: `+591 ${phone}`, address: `${zone}, Rurrenabaque, Beni`, note },
+    });
     devices.push(
       await prisma.device.create({
-        data: {
-          customerId: customer.id,
-          type: "Teléfono",
-          brand: entry.brand,
-          model: pick(entry.models),
-          serialNumber: rand() > 0.4 ? String(randInt(100000000000000, 999999999999999)) : null,
-          accessories: pick(ACCESSORIES),
-        },
+        data: { customerId: customer.id, type: "Teléfono", brand, model, accessories: "Solo equipo" },
       }),
     );
   }
 
-  // --- Order status distribution (one order per device) ------------------
-  // 46 DELIVERED + 8 COMPLETED = 54 "completadas"; 16 active; 2 cancelled.
-  const statusPlan: RepairStatus[] = [
-    ...Array(46).fill("DELIVERED"),
-    ...Array(8).fill("COMPLETED"),
-    ...Array(4).fill("NEW"),
-    ...Array(4).fill("DIAGNOSIS"),
-    ...Array(4).fill("WAITING_FOR_PARTS"),
-    ...Array(4).fill("REPAIRING"),
-    ...Array(2).fill("CANCELLED"),
-  ];
-  const statuses = shuffle(statusPlan);
-  const DURATIONS = [1, 2, 2, 3, 3, 3, 4, 4, 5, 6];
   const now = Date.now();
+  const usedCount = new Map<string, number>();
 
-  type Spec = {
-    deviceIdx: number;
-    status: RepairStatus;
-    service: Service;
-    createdAt: Date;
-    closedAt: Date | null;
-    estimatedReadyAt: Date;
-    priority: Priority;
-  };
-  const specs: Spec[] = devices.map((_, i) => {
-    const status = statuses[i];
-    const closed = status === "DELIVERED" || status === "CANCELLED";
-    const active = !["COMPLETED", "DELIVERED", "CANCELLED"].includes(status);
-    const daysAgo = active ? randInt(0, 18) : randInt(4, 120);
-    const createdAt = new Date(now - daysAgo * DAY - randInt(0, 23) * 3600 * 1000);
-    const duration = pick(DURATIONS);
-    return {
-      deviceIdx: i,
-      status,
-      service: pick(SERVICES),
-      createdAt,
-      closedAt: closed ? new Date(createdAt.getTime() + duration * DAY) : null,
-      estimatedReadyAt: new Date(createdAt.getTime() + randInt(2, 6) * DAY),
-      priority: pick<Priority>(["LOW", "MEDIUM", "MEDIUM", "HIGH", "URGENT"]),
-    };
-  });
-  specs.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  for (let i = 0; i < ORDERS.length; i++) {
+    const o = ORDERS[i];
+    const status = STATUS_MAP[o.estado];
+    const tech = technicians[o.tec];
+    const part = o.part ? spareParts[o.part - 1] : null;
+    const partPrice = part ? part.priceBs : 0;
+    const subtotal = o.costo + partPrice;
+    const discountBs = Math.round(subtotal * o.desc);
 
-  let counter = 0;
-  for (const spec of specs) {
-    counter++;
-    const device = devices[spec.deviceIdx];
-    const { service, status } = spec;
-    const orderCode = `REP-${spec.createdAt.getFullYear()}-${String(counter).padStart(4, "0")}`;
+    // Dates: delivered older, repairing mid, received recent.
+    const daysAgo = status === "DELIVERED" ? 40 - i : status === "REPAIRING" ? 9 : i % 5;
+    const createdAt = new Date(now - daysAgo * DAY - (i % 8) * 3600 * 1000);
+    const closedAt = status === "DELIVERED" ? new Date(createdAt.getTime() + 3 * DAY) : null;
 
-    // History steps.
+    // History path.
     let steps: RepairStatus[];
-    if (status === "CANCELLED") steps = ["NEW", "DIAGNOSIS", "CANCELLED"];
-    else steps = STATUS_FLOW.slice(0, STATUS_FLOW.indexOf(status) + 1);
+    if (status === "DELIVERED") steps = ["NEW", "DIAGNOSIS", "REPAIRING", "COMPLETED", "DELIVERED"];
+    else if (status === "REPAIRING") steps = ["NEW", "DIAGNOSIS", "REPAIRING"];
+    else steps = ["NEW"];
+    const end = (closedAt ?? new Date()).getTime();
+    const span = Math.max(DAY, end - createdAt.getTime());
 
-    // Labor cost set once the order has been diagnosed.
-    const hasLabor = status !== "NEW";
-    const laborCost = hasLabor ? round10(randInt(service.labor[0], service.labor[1])) : null;
-
-    // A part is consumed once the order is at/over "En reparación".
-    const consumesPart =
-      service.cat != null && ["REPAIRING", "COMPLETED", "DELIVERED"].includes(status);
-    let part: (typeof spareParts)[number] | null = null;
-    if (consumesPart) {
-      const pool = partsByCategory.get(service.cat!) ?? [];
-      if (pool.length) {
-        part = pick(pool);
-        usedCount.set(part.id, (usedCount.get(part.id) ?? 0) + 1);
-      }
-    }
-    const partsTotal = part ? part.priceBs : 0;
-    const estimatedCost = round10((laborCost ?? 40) + partsTotal);
+    if (part) usedCount.set(part.id, (usedCount.get(part.id) ?? 0) + 1);
 
     const order = await prisma.repairOrder.create({
       data: {
-        orderCode,
-        deviceId: device.id,
-        description: `${service.falla} — ${service.trabajo}`,
-        priority: spec.priority,
+        orderCode: `REP-2026-${String(i + 1).padStart(4, "0")}`,
+        deviceId: devices[i].id,
+        description: o.falla,
+        priority: "MEDIUM",
         status,
-        estimatedCost,
-        laborCost,
-        estimatedReadyAt: spec.estimatedReadyAt,
-        createdAt: spec.createdAt,
-        closedAt: spec.closedAt,
+        estimatedCost: subtotal,
+        laborCost: o.costo,
+        estimatedReadyAt: new Date(createdAt.getTime() + 3 * DAY),
+        createdAt,
+        closedAt,
         history: {
           create: steps.map((st, idx) => ({
             status: st,
             note: HISTORY_NOTE[st],
-            technicianId: technicians[(counter + idx) % technicians.length].id,
-            changedAt: new Date(
-              spec.createdAt.getTime() +
-                Math.round(
-                  (Math.max(DAY, (spec.closedAt ?? new Date()).getTime() - spec.createdAt.getTime()) *
-                    idx) /
-                    steps.length,
-                ),
-            ),
+            technicianId: tech.id,
+            changedAt: new Date(createdAt.getTime() + Math.round((span * idx) / steps.length)),
           })),
         },
-        ...(part
-          ? {
-              parts: {
-                create: { sparePartId: part.id, quantity: 1, unitPriceBs: part.priceBs },
-              },
-            }
-          : {}),
+        ...(part ? { parts: { create: { sparePartId: part.id, quantity: 1, unitPriceBs: part.priceBs } } } : {}),
       },
     });
 
-    // Payment for completed/delivered orders.
-    if (status === "DELIVERED" || status === "COMPLETED") {
-      const discountBs = rand() > 0.8 ? round10(randInt(10, 30)) : 0;
-      const total = Math.max(0, (laborCost ?? 0) + partsTotal - discountBs);
-      const paid = status === "DELIVERED" || rand() > 0.5;
-      await prisma.payment.create({
-        data: {
-          repairOrderId: order.id,
-          method: pick<PaymentMethod>(["CASH", "CASH", "QR", "TRANSFER"]),
-          discountBs,
-          totalBs: total,
-          status: paid ? "PAID" : "PENDING",
-          paidAt: spec.closedAt ?? new Date(),
-        },
-      });
-    }
+    // Payment for every order (Excel PAGOS): paid if delivered, else pending.
+    await prisma.payment.create({
+      data: {
+        repairOrderId: order.id,
+        method: o.forma === "QR" ? "QR" : ("CASH" as PaymentMethod),
+        discountBs,
+        totalBs: Math.max(0, subtotal - discountBs),
+        status: status === "DELIVERED" ? "PAID" : "PENDING",
+        paidAt: closedAt ?? createdAt,
+      },
+    });
   }
 
-  // Apply stock consumption (entrada − salida).
+  // Apply stock consumption (entrada − salida = stock actual).
   for (const [sparePartId, used] of usedCount) {
     const sp = spareParts.find((s) => s.id === sparePartId)!;
     await prisma.sparePart.update({
