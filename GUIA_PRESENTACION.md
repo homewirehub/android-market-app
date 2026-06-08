@@ -44,15 +44,21 @@ Internet nicht immer stabil ist.
   Status.
 - ✅ **Reparaturbeleg als PDF** – mit Logo-Bereich, allen Daten und QR-Code, zum
   Ausdrucken.
-- ✅ **Statusverfolgung** – Nuevo → Diagnóstico → Esperando repuestos → En
-  reparación → Completado → Entregado.
+- ✅ **Statusverfolgung** – Recibido → Diagnóstico → Esperando repuestos → En
+  reparación → Listo para entrega → Entregado (+ Cancelado).
 - ✅ **Verlauf/Historie** – jeder Schritt wird mit Datum, Uhrzeit und Techniker
   gespeichert (Beweis, was passiert ist).
 - ✅ **Detailseite je Auftrag** – die Seite, die ein Mitarbeiter den ganzen Tag
   offen hat.
+- ✅ **Repuestos & Inventar** – Ersatzteillager mit Stock, Preis und Warnung
+  „reabastecer" bei niedrigem Bestand.
+- ✅ **Verbrauchte Teile pro Auftrag** – zieht automatisch vom Lager ab.
+- ✅ **Pagos** – Zahlart, Rabatt und **Total** (Mano de obra + Repuestos − Descuento).
+- ✅ **Reportes** – Einnahmen, meistgenutzte Teile, meistgefragte Services,
+  Nachbestellungen, offene Aufträge.
 - ✅ **Suchfunktion** – nach Kundenname oder Auftragsnummer.
 - ✅ **Kennzahlen-Dashboard** – Kunden, Geräte, aktive/abgeschlossene
-  Reparaturen, durchschnittliche Reparaturzeit.
+  Reparaturen, durchschnittliche Reparaturzeit, Einnahmen.
 - ✅ **Kostenschätzung (Bs) + Abholdatum** – Kunde sieht den Preis online.
 - ✅ **Heller & dunkler Modus**, spanische Bedienoberfläche.
 - ✅ **Realistische Demo-Daten** (38 Kunden, 72 Geräte, 72 Aufträge) mit echten
@@ -87,13 +93,17 @@ Internet nicht immer stabil ist.
 4. **„Generar comprobante“** klicken → das **PDF mit QR-Code** öffnet sich.
    - Sagen: *„Diesen Beleg bekommt der Kunde. Mit dem QR-Code kann er den Status
      jederzeit selbst abrufen.“*
-5. **Status ändern** (rechts „Actualizar estado“): z. B. auf *En reparación*,
+5. **Repuesto + Zahlung** (auf der Detailseite): unter „Repuestos utilizados" ein
+   Ersatzteil **hinzufügen** (zieht vom Lager ab), dann unter „Pago" das **Total**
+   zeigen (Mano de obra + Repuestos − Descuento).
+   - Sagen: *„Das System rechnet den Preis automatisch und führt das Lager nach.“*
+6. **Status ändern** (rechts „Actualizar estado“): z. B. auf *En reparación*,
    Techniker bestätigen, **„Guardar cambio“**.
    - Sagen: *„Jeder Schritt wird mit Uhrzeit gespeichert.“*
-6. **Kundenseite** öffnen → **„Consultar estado“** → die Auftragsnummer eingeben.
+7. **Kundenseite** öffnen → **„Consultar estado“** → die Auftragsnummer eingeben.
    - Sagen: *„Der Kunde sieht Status, Verlauf und den Preis – ohne anzurufen.“*
-7. **Zurück zum „Panel“ (Dashboard).**
-   - Sagen: *„Hier sieht der Besitzer alle Kennzahlen auf einen Blick.“*
+8. **„Panel“ + „Reportes“ zeigen.**
+   - Sagen: *„Hier sieht der Besitzer Einnahmen, meistgenutzte Teile und Kennzahlen.“*
 
 ✅ Wenn dieser Ablauf durchläuft, ist die Präsentation gewonnen.
 
@@ -176,14 +186,19 @@ internet no siempre es estable.
 - ✅ **Código de orden automático** – p. ej. `REP-2026-0073`.
 - ✅ **Código QR** para cada orden – el cliente lo escanea y ve el estado.
 - ✅ **Comprobante en PDF** – con todos los datos y el código QR, para imprimir.
-- ✅ **Seguimiento de estado** – Nuevo → Diagnóstico → Esperando repuestos →
-  En reparación → Completado → Entregado.
+- ✅ **Seguimiento de estado** – Recibido → Diagnóstico → Esperando repuestos →
+  En reparación → Listo para entrega → Entregado (+ Cancelado).
 - ✅ **Historial** – cada paso se guarda con fecha, hora y técnico.
 - ✅ **Página de detalle por orden** – la pantalla que el técnico tiene abierta
   todo el día.
+- ✅ **Repuestos e inventario** – stock, precio y alerta de "reabastecer".
+- ✅ **Repuestos usados por orden** – descuentan automáticamente del stock.
+- ✅ **Pagos** – forma de pago, descuento y **total** (mano de obra + repuestos − descuento).
+- ✅ **Reportes** – ingresos, repuestos más usados, servicios más solicitados,
+  por reabastecer, órdenes pendientes.
 - ✅ **Búsqueda** – por nombre del cliente o número de orden.
 - ✅ **Tablero de indicadores** – clientes, equipos, reparaciones activas y
-  completadas, tiempo promedio.
+  completadas, tiempo promedio, ingresos.
 - ✅ **Costo estimado (Bs) + fecha de entrega** – el cliente ve el precio en línea.
 - ✅ **Modo claro y oscuro**, interfaz en español.
 - ✅ **Datos de demostración realistas** (38 clientes, 72 equipos, 72 órdenes) con
@@ -219,13 +234,17 @@ digitalizado**.
 4. Clic en **«Generar comprobante»** → se abre el **PDF con el código QR**.
    - Decir: *«Este comprobante se le da al cliente. Con el QR puede consultar el
      estado cuando quiera.»*
-5. **Cambiar el estado** (derecha, «Actualizar estado»): p. ej. a *En reparación*,
+5. **Repuesto + pago** (en el detalle): en «Repuestos utilizados» **agregar** un
+   repuesto (descuenta del stock) y en «Pago» mostrar el **total** (mano de obra +
+   repuestos − descuento).
+   - Decir: *«El sistema calcula el precio y actualiza el inventario solo.»*
+6. **Cambiar el estado** (derecha, «Actualizar estado»): p. ej. a *En reparación*,
    confirmar técnico, **«Guardar cambio»**.
    - Decir: *«Cada paso se guarda con la hora.»*
-6. **Lado del cliente** → **«Consultar estado»** → escribir el número de orden.
+7. **Lado del cliente** → **«Consultar estado»** → escribir el número de orden.
    - Decir: *«El cliente ve el estado, el historial y el precio, sin llamar.»*
-7. **Volver al «Panel» (tablero).**
-   - Decir: *«Aquí el dueño ve todos los indicadores de un vistazo.»*
+8. **«Panel» + «Reportes».**
+   - Decir: *«Aquí el dueño ve ingresos, repuestos más usados e indicadores.»*
 
 ✅ Si este recorrido funciona, la presentación está ganada.
 
@@ -287,3 +306,5 @@ digitalizado**.
 | `/admin/ordenes/<código>` | Detalle + QR + PDF | Detail + QR + PDF |
 | `/admin/clientes` | Clientes | Kunden |
 | `/admin/equipos` | Equipos | Geräte |
+| `/admin/repuestos` | Repuestos / inventario | Ersatzteile / Lager |
+| `/admin/reportes` | Reportes | Berichte / Kennzahlen |
