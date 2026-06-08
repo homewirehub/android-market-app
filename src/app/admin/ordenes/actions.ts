@@ -8,7 +8,22 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { generateOrderCode } from "@/lib/orderCode";
 import { STATUS_ORDER, PRIORITY_ORDER, PAYMENT_METHOD_ORDER } from "@/lib/labels";
-import type { RepairStatus, Priority, PaymentMethod } from "@prisma/client";
+import type { RepairStatus, Priority, PaymentMethod, Prisma } from "@prisma/client";
+
+// Keeps a saved payment's total in sync when labor or parts change later:
+// total = mano de obra + repuestos − descuento. No-op if there's no payment yet.
+async function syncPaymentTotal(tx: Prisma.TransactionClient, orderId: string) {
+  const payment = await tx.payment.findUnique({ where: { repairOrderId: orderId } });
+  if (!payment) return;
+  const order = await tx.repairOrder.findUnique({
+    where: { id: orderId },
+    include: { parts: true },
+  });
+  if (!order) return;
+  const partsTotal = order.parts.reduce((s, p) => s + p.unitPriceBs * p.quantity, 0);
+  const totalBs = Math.max(0, (order.laborCost ?? 0) + partsTotal - payment.discountBs);
+  await tx.payment.update({ where: { repairOrderId: orderId }, data: { totalBs } });
+}
 
 function str(form: FormData, key: string): string {
   return (form.get(key) ?? "").toString().trim();
@@ -78,10 +93,12 @@ export async function updateOrderStatus(formData: FormData) {
         note: note || "Estado actualizado por administración.",
       },
     });
+    if (laborCost !== null) await syncPaymentTotal(tx, orderId);
   });
 
   revalidatePath("/admin");
   revalidatePath("/admin/ordenes");
+  revalidatePath("/admin/reportes");
   revalidatePath(`/admin/ordenes/${orderId}`);
 }
 
@@ -189,10 +206,12 @@ export async function addOrderPart(formData: FormData) {
       where: { id: sparePartId },
       data: { stock: Math.max(0, part.stock - quantity) },
     });
+    await syncPaymentTotal(tx, orderId);
   });
 
   revalidatePath(`/admin/ordenes/${orderId}`);
   revalidatePath("/admin/repuestos");
+  revalidatePath("/admin/reportes");
 }
 
 // Remove a part from an order; returns the units to stock.
@@ -209,10 +228,12 @@ export async function removeOrderPart(formData: FormData) {
       where: { id: op.sparePartId },
       data: { stock: { increment: op.quantity } },
     });
+    await syncPaymentTotal(tx, orderId);
   });
 
   revalidatePath(`/admin/ordenes/${orderId}`);
   revalidatePath("/admin/repuestos");
+  revalidatePath("/admin/reportes");
 }
 
 // --- Payment (pago) -----------------------------------------------------
