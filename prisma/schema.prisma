@@ -13,14 +13,15 @@ datasource db {
 
 // Status values for a repair order.
 // Stored in English in the DB/code; displayed in Spanish in the UI
-// (see src/lib/status.ts for the label mapping).
+// (see src/lib/labels.ts for the label mapping).
 enum RepairStatus {
-  NEW
-  DIAGNOSIS
-  WAITING_FOR_PARTS
-  REPAIRING
-  COMPLETED
-  DELIVERED
+  NEW // Recibido
+  DIAGNOSIS // Diagnóstico
+  WAITING_FOR_PARTS // Esperando repuestos
+  REPAIRING // En reparación
+  COMPLETED // Listo para entrega
+  DELIVERED // Entregado
+  CANCELLED // Cancelado
 }
 
 // Priority of a repair order.
@@ -31,12 +32,27 @@ enum Priority {
   URGENT
 }
 
+// Payment method (forma de pago).
+enum PaymentMethod {
+  CASH // Efectivo
+  QR
+  TRANSFER // Transferencia
+}
+
+// Payment status (estado de pago).
+enum PaymentStatus {
+  PENDING // Pendiente
+  PAID // Pagado
+}
+
 model Customer {
   id        String   @id @default(cuid())
   name      String
+  ci        String? // Cédula de identidad (C.I.)
   phone     String?
   email     String?
   address   String?
+  note      String? // observación
   createdAt DateTime @default(now())
 
   devices Device[]
@@ -45,29 +61,33 @@ model Customer {
 model Device {
   id           String  @id @default(cuid())
   customerId   String
-  type         String // e.g. "Laptop", "Telefono", "Impresora", "Tablet"
+  type         String // e.g. "Laptop", "Teléfono", "Impresora", "Tablet"
   brand        String
   model        String
-  serialNumber String?
+  serialNumber String? // IMEI / número de serie
+  accessories  String? // accesorios recibidos (cargador, funda…)
 
   customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
   repairOrders RepairOrder[]
 }
 
 model RepairOrder {
-  id          String       @id @default(cuid())
+  id               String       @id @default(cuid())
   orderCode        String       @unique // human-readable, e.g. REP-2026-0001
   deviceId         String
-  description      String
+  description      String // falla reportada
   priority         Priority     @default(MEDIUM)
   status           RepairStatus @default(NEW)
   estimatedCost    Float? // costo estimado en bolivianos (Bs)
+  laborCost        Float? // costo de servicio / mano de obra (Bs)
   estimatedReadyAt DateTime? // fecha estimada de entrega
   createdAt        DateTime     @default(now())
   closedAt         DateTime? // set when the order reaches DELIVERED
 
   device  Device                @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   history RepairStatusHistory[]
+  parts   OrderPart[]
+  payment Payment?
 }
 
 model RepairStatusHistory {
@@ -86,6 +106,46 @@ model Technician {
   id             String  @id @default(cuid())
   name           String
   specialization String?
+  phone          String?
+  active         Boolean @default(true)
 
   history RepairStatusHistory[]
+}
+
+// Repuesto / inventario de repuestos.
+model SparePart {
+  id       String @id @default(cuid())
+  code     String @unique // e.g. REPS-001
+  name     String
+  category String // Pantalla, Batería, Tapa, Módulo de carga…
+  priceBs  Float // precio unitario en Bs
+  stock    Int    @default(0) // stock actual
+  stockMin Int    @default(0) // stock mínimo
+
+  usages OrderPart[]
+}
+
+// Detalle de repuestos: parts used on a repair order (decrements stock).
+model OrderPart {
+  id            String @id @default(cuid())
+  repairOrderId String
+  sparePartId   String
+  quantity      Int    @default(1)
+  unitPriceBs   Float // precio unitario al momento de uso (Bs)
+
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  sparePart   SparePart   @relation(fields: [sparePartId], references: [id], onDelete: Restrict)
+}
+
+// Pago del servicio técnico.
+model Payment {
+  id            String        @id @default(cuid())
+  repairOrderId String        @unique
+  method        PaymentMethod @default(CASH)
+  discountBs    Float         @default(0) // descuento en Bs
+  totalBs       Float // total cobrado (mano de obra + repuestos − descuento)
+  status        PaymentStatus @default(PAID)
+  paidAt        DateTime      @default(now())
+
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
 }
