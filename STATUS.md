@@ -2,6 +2,23 @@
 
 ## English
 
+### ✅ Done — Inventory, payments & reports (matches the academic proposal)
+- **Spare-parts inventory** (`/admin/repuestos`): parts with category, price,
+  stock and minimum; low-stock "reabastecer" alerts; add part and restock.
+- **Parts used per order** (detalle de repuestos): add/remove parts on the order
+  detail page; using a part **decrements stock**, removing it returns it.
+- **Payments** (pagos): forma de pago (Efectivo/QR/Transferencia), descuento,
+  estado (Pendiente/Pagado); **total computed server-side** = mano de obra +
+  repuestos − descuento. Shown on the detail page, public status page and PDF.
+- **Reports** (`/admin/reportes`): ingresos cobrados/pendientes, repuestos más
+  utilizados, servicios más solicitados, repuestos por reabastecer, órdenes
+  pendientes. Dashboard gained an "Ingresos cobrados" KPI.
+- **Status terminology aligned** with the proposal: Recibido, Diagnóstico,
+  Esperando repuestos, En reparación, Listo para entrega, Entregado, Cancelado.
+- Data-model fields added (C.I., accesorios, mano de obra, técnico teléfono).
+  Seed now uses the shop's real spare-parts list (pantallas, baterías, tapas,
+  módulos de carga) and is phone-focused.
+
 ### ✅ Done — KPIs, search, cost & pickup date, realistic data
 - **Dashboard KPIs**: clientes registrados, equipos recibidos, reparaciones
   activas, reparaciones completadas, and average turnaround (tiempo promedio, in
@@ -92,6 +109,23 @@
 ---
 
 ## Español
+
+### ✅ Hecho — Inventario, pagos y reportes (según la propuesta académica)
+- **Inventario de repuestos** (`/admin/repuestos`): repuestos con categoría,
+  precio, stock y mínimo; alertas de "reabastecer"; agregar repuesto y reponer.
+- **Repuestos por orden** (detalle de repuestos): agregar/quitar repuestos en el
+  detalle; usar un repuesto **descuenta del stock**, quitarlo lo devuelve.
+- **Pagos**: forma de pago (Efectivo/QR/Transferencia), descuento, estado
+  (Pendiente/Pagado); **total calculado en el servidor** = mano de obra +
+  repuestos − descuento. Visible en el detalle, la página pública y el PDF.
+- **Reportes** (`/admin/reportes`): ingresos cobrados/pendientes, repuestos más
+  utilizados, servicios más solicitados, repuestos por reabastecer, órdenes
+  pendientes. El panel añadió el indicador "Ingresos cobrados".
+- **Terminología de estados alineada** con la propuesta: Recibido, Diagnóstico,
+  Esperando repuestos, En reparación, Listo para entrega, Entregado, Cancelado.
+- Campos del modelo añadidos (C.I., accesorios, mano de obra, teléfono del
+  técnico). El seed usa la lista real de repuestos del taller y se centra en
+  teléfonos.
 
 ### ✅ Hecho — Indicadores, búsqueda, costo y fecha de entrega, datos reales
 - **Indicadores del panel**: clientes registrados, equipos recibidos,
