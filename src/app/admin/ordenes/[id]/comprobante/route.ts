@@ -4,7 +4,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { prisma } from "@/lib/prisma";
 import { statusUrl } from "@/lib/appUrl";
 import { qrPngBuffer } from "@/lib/qr";
-import { statusLabel, priorityLabel, formatBs, formatDateShort } from "@/lib/labels";
+import { statusLabel, formatBs, formatDateShort } from "@/lib/labels";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
