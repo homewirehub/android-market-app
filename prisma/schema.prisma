@@ -1,0 +1,89 @@
+// Prisma schema for the Android Market repair-shop management system.
+// Local-first: a single SQLite file (see DATABASE_URL in .env).
+// The DB file is gitignored and regenerated via `npm run db:reset`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Status values for a repair order.
+// Stored in English in the DB/code; displayed in Spanish in the UI
+// (see src/lib/status.ts for the label mapping).
+enum RepairStatus {
+  NEW
+  DIAGNOSIS
+  WAITING_FOR_PARTS
+  REPAIRING
+  COMPLETED
+  DELIVERED
+}
+
+// Priority of a repair order.
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  createdAt DateTime @default(now())
+
+  devices Device[]
+}
+
+model Device {
+  id           String  @id @default(cuid())
+  customerId   String
+  type         String // e.g. "Laptop", "Telefono", "Impresora", "Tablet"
+  brand        String
+  model        String
+  serialNumber String?
+
+  customer     Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  repairOrders RepairOrder[]
+}
+
+model RepairOrder {
+  id          String       @id @default(cuid())
+  orderCode   String       @unique // human-readable, e.g. REP-2026-0001
+  deviceId    String
+  description String
+  priority    Priority     @default(MEDIUM)
+  status      RepairStatus @default(NEW)
+  createdAt   DateTime     @default(now())
+  closedAt    DateTime? // set when the order reaches DELIVERED
+
+  device  Device                @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  history RepairStatusHistory[]
+}
+
+model RepairStatusHistory {
+  id            String       @id @default(cuid())
+  repairOrderId String
+  status        RepairStatus
+  note          String?
+  technicianId  String?
+  changedAt     DateTime     @default(now())
+
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: Cascade)
+  technician  Technician? @relation(fields: [technicianId], references: [id], onDelete: SetNull)
+}
+
+model Technician {
+  id             String  @id @default(cuid())
+  name           String
+  specialization String?
+
+  history RepairStatusHistory[]
+}
