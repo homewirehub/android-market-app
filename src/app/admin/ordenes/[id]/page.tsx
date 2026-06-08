@@ -9,6 +9,8 @@ import {
   statusLabel,
   priorityLabel,
   formatDateTime,
+  formatDateShort,
+  formatBs,
   STATUS_ORDER,
 } from "@/lib/labels";
 import { statusUrl } from "@/lib/appUrl";
@@ -103,6 +105,10 @@ export default async function OrderDetailPage({
               </DetailRow>
               <DetailRow label="Problema">{order.description}</DetailRow>
               <DetailRow label="Prioridad">{priorityLabel(order.priority)}</DetailRow>
+              <DetailRow label="Costo estimado">{formatBs(order.estimatedCost)}</DetailRow>
+              <DetailRow label="Entrega estimada">
+                {formatDateShort(order.estimatedReadyAt)}
+              </DetailRow>
               <DetailRow label="Estado">
                 <StatusBadge status={order.status} />
               </DetailRow>
@@ -212,6 +218,32 @@ export default async function OrderDetailPage({
                   ))}
                 </select>
               </Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Costo (Bs)" htmlFor="estimatedCost">
+                  <input
+                    id="estimatedCost"
+                    name="estimatedCost"
+                    type="number"
+                    min="0"
+                    step="10"
+                    defaultValue={order.estimatedCost ?? ""}
+                    className={fieldClass}
+                  />
+                </Field>
+                <Field label="Entrega est." htmlFor="estimatedReadyAt">
+                  <input
+                    id="estimatedReadyAt"
+                    name="estimatedReadyAt"
+                    type="date"
+                    defaultValue={
+                      order.estimatedReadyAt
+                        ? order.estimatedReadyAt.toISOString().slice(0, 10)
+                        : ""
+                    }
+                    className={fieldClass}
+                  />
+                </Field>
+              </div>
               <Field label="Nota (opcional)" htmlFor="note">
                 <input id="note" name="note" className={fieldClass} placeholder="Comentario del cambio…" />
               </Field>

@@ -153,6 +153,23 @@ export function IntakeForm({
             </select>
           </Field>
         </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Costo estimado (Bs)" htmlFor="estimatedCost">
+            <input
+              id="estimatedCost"
+              name="estimatedCost"
+              type="number"
+              min="0"
+              step="10"
+              inputMode="decimal"
+              className={fieldClass}
+              placeholder="250"
+            />
+          </Field>
+          <Field label="Fecha estimada de entrega" htmlFor="estimatedReadyAt">
+            <input id="estimatedReadyAt" name="estimatedReadyAt" type="date" className={fieldClass} />
+          </Field>
+        </div>
       </fieldset>
 
       <Button type="submit" className="w-full py-2.5">

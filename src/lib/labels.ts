@@ -60,6 +60,19 @@ export function formatDate(date: Date | string | null | undefined): string {
   });
 }
 
+// Short numeric date for ETAs (e.g. "15/06/2026").
+export function formatDateShort(date: Date | string | null | undefined): string {
+  if (!date) return "—";
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toLocaleDateString("es-BO", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+// Cost in bolivianos (e.g. "250 Bs").
+export function formatBs(amount: number | null | undefined): string {
+  if (amount == null) return "—";
+  return `${amount.toLocaleString("es-BO")} Bs`;
+}
+
 // Date + time for the order history timeline (e.g. "8 jun 2026, 12:25").
 export function formatDateTime(date: Date | string | null | undefined): string {
   if (!date) return "—";
