@@ -91,14 +91,31 @@
   no web-font fetch.
 - Git initialized.
 
-### 🔜 Next — Features (not built yet)
-- **Full CRUD** for Customers, Devices, Repair Orders, Technicians.
-- **Status workflow**: change an order's status with a note + technician, writing
-  to `RepairStatusHistory`; auto-set `closedAt` on DELIVERED.
-- **QR codes** on repair orders linking to the public `/status?code=…` page.
-- **Dashboard stats**: turnaround time, open vs. closed, workload per technician.
-- Order detail pages, search/filtering, printable repair tickets.
-- (Later) authentication, roles, backup/export of the SQLite file.
+### ✅ Reviewed — quality checks (last pass)
+- `npm run build` passes; `npm run lint` is clean (0 errors / 0 warnings).
+- Demo data verified against the source Excel (record counts + a sampled order +
+  inventory stock = entrada − salida).
+- **Fixed in this pass:** a saved payment's total now **auto-recomputes** when the
+  labor cost or parts change afterwards (keeps dashboard/report income accurate);
+  `ThemeToggle` rewritten with `useSyncExternalStore` (no setState-in-effect, no
+  hydration mismatch); removed an unused import.
+
+### 🔜 Possible improvements (prioritised)
+1. **Edit/delete (full CRUD)** for customers, devices, orders, spare parts and
+   technicians — today there is create + status/parts/payment updates, but no edit
+   or delete screens.
+2. **Authentication** for the admin area (today `/admin` is open on the machine).
+3. **Accent-insensitive search** — SQLite `LIKE` only ignores ASCII case, so
+   "vasquez" does not match "Vásquez".
+4. **Backup / export** of the SQLite file (one-click copy) and re-import.
+5. **Richer reports** — date ranges, income per technician, per-period charts.
+6. **Order-code safety** — guard the (rare) race if two orders are created at the
+   exact same instant.
+7. Eventually migrate to **Prisma 7** / `prisma.config.ts` when convenient.
+
+### Known limitations
+- No login yet — anyone with access to the laptop can open `/admin`.
+- No tax invoice (factura) numbering / SIN integration (out of scope per the proposal).
 
 ### Notes
 - **Prisma 6**, not 7, was chosen on purpose: Prisma 7 requires a new generator +
@@ -206,14 +223,31 @@
   absolutas, sin descarga de fuentes web.
 - Git inicializado.
 
-### 🔜 Siguiente — Funcionalidades (aún no construidas)
-- **CRUD completo** para Clientes, Equipos, Órdenes de reparación y Técnicos.
-- **Flujo de estados**: cambiar el estado de una orden con una nota + técnico,
-  registrando en `RepairStatusHistory`; fijar `closedAt` automáticamente al ENTREGAR.
-- **Códigos QR** en las órdenes que enlazan a la página pública `/status?code=…`.
-- **Estadísticas del panel**: tiempo de reparación, abiertas vs. cerradas, carga por técnico.
-- Páginas de detalle de orden, búsqueda/filtros, comprobantes de reparación imprimibles.
-- (Más adelante) autenticación, roles, respaldo/exportación del archivo SQLite.
+### ✅ Revisado — controles de calidad (última pasada)
+- `npm run build` compila; `npm run lint` está limpio (0 errores / 0 advertencias).
+- Datos de demostración verificados contra la Excel original (conteos + una orden
+  de muestra + inventario stock = entrada − salida).
+- **Corregido en esta pasada:** el total de un pago ya **se recalcula solo** cuando
+  luego cambian la mano de obra o los repuestos (mantiene exactos los ingresos del
+  panel/reportes); `ThemeToggle` reescrito con `useSyncExternalStore` (sin
+  setState-en-efecto ni desajuste de hidratación); se quitó un import sin uso.
+
+### 🔜 Posibles mejoras (priorizadas)
+1. **Editar/eliminar (CRUD completo)** para clientes, equipos, órdenes, repuestos y
+   técnicos — hoy hay alta + cambios de estado/repuestos/pago, pero no pantallas de
+   edición o borrado.
+2. **Autenticación** para administración (hoy `/admin` está abierto en la máquina).
+3. **Búsqueda sin acentos** — `LIKE` de SQLite solo ignora mayúsculas ASCII, así que
+   "vasquez" no coincide con "Vásquez".
+4. **Respaldo / exportación** del archivo SQLite (copia en un clic) y reimportación.
+5. **Reportes más ricos** — rangos de fechas, ingresos por técnico, gráficos por período.
+6. **Seguridad del código de orden** — proteger la (rara) coincidencia si se crean
+   dos órdenes en el mismo instante.
+7. Eventualmente migrar a **Prisma 7** / `prisma.config.ts` cuando convenga.
+
+### Limitaciones conocidas
+- Sin inicio de sesión todavía — cualquiera con acceso a la laptop puede abrir `/admin`.
+- Sin numeración de factura / integración con el SIN (fuera del alcance de la propuesta).
 
 ### Notas
 - Se eligió **Prisma 6**, no la 7, a propósito: Prisma 7 requiere un nuevo generador +
