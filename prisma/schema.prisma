@@ -56,13 +56,15 @@ model Device {
 
 model RepairOrder {
   id          String       @id @default(cuid())
-  orderCode   String       @unique // human-readable, e.g. REP-2026-0001
-  deviceId    String
-  description String
-  priority    Priority     @default(MEDIUM)
-  status      RepairStatus @default(NEW)
-  createdAt   DateTime     @default(now())
-  closedAt    DateTime? // set when the order reaches DELIVERED
+  orderCode        String       @unique // human-readable, e.g. REP-2026-0001
+  deviceId         String
+  description      String
+  priority         Priority     @default(MEDIUM)
+  status           RepairStatus @default(NEW)
+  estimatedCost    Float? // costo estimado en bolivianos (Bs)
+  estimatedReadyAt DateTime? // fecha estimada de entrega
+  createdAt        DateTime     @default(now())
+  closedAt         DateTime? // set when the order reaches DELIVERED
 
   device  Device                @relation(fields: [deviceId], references: [id], onDelete: Cascade)
   history RepairStatusHistory[]
