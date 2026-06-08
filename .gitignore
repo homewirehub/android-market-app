@@ -30,8 +30,17 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files (real env is local-only; the example IS committed)
 .env*
+!.env.example
+
+# local SQLite database (regenerated via `npm run db:reset` — never commit)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+/prisma/*.db
+/prisma/*.db-journal
 
 # vercel
 .vercel
@@ -39,3 +48,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code local, machine-specific settings
+.claude/settings.local.json

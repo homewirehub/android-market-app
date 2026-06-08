@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: any element inside <html class="dark"> gets dark: styles.
+   We toggle the `dark` class on <html> from the ThemeToggle component. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* System font stack — no web-font download, works fully offline. */
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  /* Brand accent (emerald) exposed as utilities: bg-brand, text-brand, etc. */
+  --color-brand-50: oklch(0.979 0.021 166);
+  --color-brand-100: oklch(0.95 0.052 163);
+  --color-brand-500: oklch(0.696 0.17 162.5);
+  --color-brand-600: oklch(0.596 0.145 163.2);
+  --color-brand-700: oklch(0.508 0.118 165.6);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tighter tracking on large headings for a more refined, modern look. */
+h1,
+h2 {
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background-color: oklch(0.696 0.17 162.5 / 0.25);
 }
