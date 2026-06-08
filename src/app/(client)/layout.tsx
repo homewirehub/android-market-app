@@ -14,13 +14,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-20 border-b border-zinc-200/70 bg-white/80 backdrop-blur-md dark:border-zinc-800/70 dark:bg-zinc-950/80">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-3.5">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white">
+          <Link href="/" className="flex items-center gap-2 whitespace-nowrap">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-brand-600 text-white">
               <WrenchIcon width={18} height={18} />
             </span>
             <span className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Android Market{" "}
-              <span className="font-normal text-zinc-400">Reparación</span>
+              Android Market
+              <span className="hidden font-normal text-zinc-400 lg:inline"> · Servicio Técnico</span>
             </span>
           </Link>
 
@@ -51,7 +51,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <main className="flex-1">{children}</main>
 
       <footer className="border-t border-zinc-200 bg-white py-6 text-center text-xs text-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-500">
-        Android Market · Sistema local de gestión de reparaciones · Funciona sin conexión
+        Android Market · Servicio técnico de celulares · Rurrenabaque, Beni · Funciona sin conexión
       </footer>
     </div>
   );
