@@ -1,15 +1,23 @@
 // Spanish display labels for enums that are stored in English in the DB.
 // Keep the enum keys in English (NEW, DIAGNOSIS, ...) but always render
 // these labels in the UI, since the users are Spanish-speaking.
-import type { RepairStatus, Priority } from "@prisma/client";
+import type {
+  RepairStatus,
+  Priority,
+  PaymentMethod,
+  PaymentStatus,
+} from "@prisma/client";
 
+// Status labels follow the terminology of the academic proposal (Recibido,
+// En reparación, Listo para entrega, Entregado, Cancelado).
 export const STATUS_LABELS: Record<RepairStatus, string> = {
-  NEW: "Nuevo",
+  NEW: "Recibido",
   DIAGNOSIS: "Diagnóstico",
   WAITING_FOR_PARTS: "Esperando repuestos",
   REPAIRING: "En reparación",
-  COMPLETED: "Completado",
+  COMPLETED: "Listo para entrega",
   DELIVERED: "Entregado",
+  CANCELLED: "Cancelado",
 };
 
 // Ordered list of statuses (workflow order), handy for selects and dashboards.
@@ -20,6 +28,7 @@ export const STATUS_ORDER: RepairStatus[] = [
   "REPAIRING",
   "COMPLETED",
   "DELIVERED",
+  "CANCELLED",
 ];
 
 // Dot color per status, used inside the (neutral) status badge.
@@ -30,7 +39,29 @@ export const STATUS_DOT: Record<RepairStatus, string> = {
   REPAIRING: "bg-indigo-500",
   COMPLETED: "bg-emerald-500",
   DELIVERED: "bg-brand-600",
+  CANCELLED: "bg-red-500",
 };
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  CASH: "Efectivo",
+  QR: "QR",
+  TRANSFER: "Transferencia",
+};
+
+export const PAYMENT_METHOD_ORDER: PaymentMethod[] = ["CASH", "QR", "TRANSFER"];
+
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  PENDING: "Pendiente",
+  PAID: "Pagado",
+};
+
+export function paymentMethodLabel(m: PaymentMethod): string {
+  return PAYMENT_METHOD_LABELS[m] ?? m;
+}
+
+export function paymentStatusLabel(s: PaymentStatus): string {
+  return PAYMENT_STATUS_LABELS[s] ?? s;
+}
 
 export const PRIORITY_LABELS: Record<Priority, string> = {
   LOW: "Baja",
