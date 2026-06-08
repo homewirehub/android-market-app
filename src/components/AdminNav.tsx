@@ -5,13 +5,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { GridIcon, ClipboardIcon, UsersIcon, DeviceIcon } from "@/components/icons";
+import {
+  GridIcon,
+  ClipboardIcon,
+  UsersIcon,
+  DeviceIcon,
+  BoxIcon,
+  ChartIcon,
+} from "@/components/icons";
 
 const LINKS: { href: string; label: string; icon: ReactNode }[] = [
   { href: "/admin", label: "Panel", icon: <GridIcon /> },
   { href: "/admin/ordenes", label: "Órdenes", icon: <ClipboardIcon /> },
   { href: "/admin/clientes", label: "Clientes", icon: <UsersIcon /> },
   { href: "/admin/equipos", label: "Equipos", icon: <DeviceIcon /> },
+  { href: "/admin/repuestos", label: "Repuestos", icon: <BoxIcon /> },
+  { href: "/admin/reportes", label: "Reportes", icon: <ChartIcon /> },
 ];
 
 function isActive(pathname: string, href: string): boolean {

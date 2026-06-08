@@ -2,7 +2,13 @@
 // (e.g. REP-2026-0001) and sees the current status + history. No auth.
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Card, StatusBadge, Button, fieldClass } from "@/components/ui";
-import { statusLabel, formatDate, formatBs, formatDateShort } from "@/lib/labels";
+import {
+  statusLabel,
+  formatDate,
+  formatBs,
+  formatDateShort,
+  paymentStatusLabel,
+} from "@/lib/labels";
 import { SearchIcon } from "@/components/icons";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +27,7 @@ export default async function StatusPage({
         where: { orderCode: trimmed },
         include: {
           device: { include: { customer: true } },
+          payment: true,
           history: {
             orderBy: { changedAt: "asc" },
             include: { technician: true },
@@ -97,6 +104,15 @@ export default async function StatusPage({
               <dd className="text-zinc-800 dark:text-zinc-200">
                 {formatDateShort(order.estimatedReadyAt)}
               </dd>
+              {order.payment ? (
+                <>
+                  <dt className="text-zinc-500 dark:text-zinc-400">Total</dt>
+                  <dd className="text-zinc-800 dark:text-zinc-200">
+                    {formatBs(order.payment.totalBs)} ·{" "}
+                    {paymentStatusLabel(order.payment.status)}
+                  </dd>
+                </>
+              ) : null}
             </dl>
 
             <div>

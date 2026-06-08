@@ -35,11 +35,20 @@ export async function GET(
 
   const order = await prisma.repairOrder.findUnique({
     where: { id },
-    include: { device: { include: { customer: true } } },
+    include: {
+      device: { include: { customer: true } },
+      parts: true,
+      payment: true,
+    },
   });
   if (!order) {
     return new Response("Orden no encontrada", { status: 404 });
   }
+
+  const partsTotal = order.parts.reduce((s, p) => s + p.unitPriceBs * p.quantity, 0);
+  const labor = order.laborCost ?? 0;
+  const discount = order.payment?.discountBs ?? 0;
+  const total = Math.max(0, labor + partsTotal - discount);
 
   const trackUrl = statusUrl(order.orderCode);
 
@@ -94,14 +103,16 @@ export async function GET(
     ["Equipo", pdfText(`${order.device.brand} ${order.device.model} (${order.device.type})`)],
     ["N.º de serie", pdfText(order.device.serialNumber)],
     ["Problema", pdfText(order.description)],
-    ["Prioridad", pdfText(priorityLabel(order.priority))],
     ["Estado", pdfText(statusLabel(order.status))],
-    ["Costo estimado", pdfText(formatBs(order.estimatedCost))],
     ["Entrega estimada", pdfText(formatDateShort(order.estimatedReadyAt))],
     [
       "Fecha de ingreso",
       pdfText(order.createdAt.toLocaleString("es-BO", { dateStyle: "long", timeStyle: "short" })),
     ],
+    ["Mano de obra", pdfText(formatBs(labor))],
+    ["Repuestos", pdfText(formatBs(partsTotal))],
+    ["Descuento", pdfText(formatBs(discount))],
+    ["TOTAL", pdfText(formatBs(total))],
   ];
 
   const labelX = margin;

@@ -146,9 +146,17 @@ export function Th({ children }: { children: ReactNode }) {
   );
 }
 
-export function Td({ children }: { children: ReactNode }) {
+export function Td({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <td className="border-t border-zinc-100 px-4 py-3 align-top text-zinc-700 dark:border-zinc-800 dark:text-zinc-300">
+    <td
+      className={`border-t border-zinc-100 px-4 py-3 align-top text-zinc-700 dark:border-zinc-800 dark:text-zinc-300 ${className}`}
+    >
       {children}
     </td>
   );

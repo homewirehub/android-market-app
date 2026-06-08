@@ -7,8 +7,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { generateOrderCode } from "@/lib/orderCode";
-import { STATUS_ORDER, PRIORITY_ORDER } from "@/lib/labels";
-import type { RepairStatus, Priority } from "@prisma/client";
+import { STATUS_ORDER, PRIORITY_ORDER, PAYMENT_METHOD_ORDER } from "@/lib/labels";
+import type { RepairStatus, Priority, PaymentMethod } from "@prisma/client";
 
 function str(form: FormData, key: string): string {
   return (form.get(key) ?? "").toString().trim();
@@ -55,6 +55,7 @@ export async function updateOrderStatus(formData: FormData) {
   const status = statusRaw;
 
   const estimatedCost = num(formData, "estimatedCost");
+  const laborCost = num(formData, "laborCost");
   const estimatedReadyAt = date(formData, "estimatedReadyAt");
 
   await prisma.$transaction(async (tx) => {
@@ -62,8 +63,10 @@ export async function updateOrderStatus(formData: FormData) {
       where: { id: orderId },
       data: {
         status,
-        closedAt: status === "DELIVERED" ? new Date() : null,
+        closedAt:
+          status === "DELIVERED" || status === "CANCELLED" ? new Date() : null,
         ...(estimatedCost !== null ? { estimatedCost } : {}),
+        ...(laborCost !== null ? { laborCost } : {}),
         ...(estimatedReadyAt !== null ? { estimatedReadyAt } : {}),
       },
     });
@@ -121,6 +124,7 @@ export async function createIntakeOrder(formData: FormData) {
       const customer = await tx.customer.create({
         data: {
           name: newCustomerName,
+          ci: str(formData, "newCustomerCi") || null,
           phone: str(formData, "newCustomerPhone") || null,
           email: str(formData, "newCustomerEmail") || null,
           address: str(formData, "newCustomerAddress") || null,
@@ -136,6 +140,7 @@ export async function createIntakeOrder(formData: FormData) {
         brand,
         model,
         serialNumber: str(formData, "serialNumber") || null,
+        accessories: str(formData, "accessories") || null,
         repairOrders: {
           create: {
             orderCode: code,
@@ -143,6 +148,7 @@ export async function createIntakeOrder(formData: FormData) {
             priority,
             status,
             estimatedCost: num(formData, "estimatedCost"),
+            laborCost: num(formData, "laborCost"),
             estimatedReadyAt: date(formData, "estimatedReadyAt"),
             closedAt: status === "DELIVERED" ? new Date() : null,
             history: {
@@ -162,4 +168,99 @@ export async function createIntakeOrder(formData: FormData) {
 
   revalidateAdmin();
   redirect(`/admin/ordenes?nueva=${encodeURIComponent(orderCode)}`);
+}
+
+// --- Parts used on an order (detalle de repuestos) ----------------------
+
+// Add a spare part to an order; decrements stock.
+export async function addOrderPart(formData: FormData) {
+  const orderId = str(formData, "orderId");
+  const sparePartId = str(formData, "sparePartId");
+  const quantity = Math.max(1, Math.trunc(num(formData, "quantity") ?? 1));
+  if (!orderId || !sparePartId) return;
+
+  await prisma.$transaction(async (tx) => {
+    const part = await tx.sparePart.findUnique({ where: { id: sparePartId } });
+    if (!part) return;
+    await tx.orderPart.create({
+      data: { repairOrderId: orderId, sparePartId, quantity, unitPriceBs: part.priceBs },
+    });
+    await tx.sparePart.update({
+      where: { id: sparePartId },
+      data: { stock: Math.max(0, part.stock - quantity) },
+    });
+  });
+
+  revalidatePath(`/admin/ordenes/${orderId}`);
+  revalidatePath("/admin/repuestos");
+}
+
+// Remove a part from an order; returns the units to stock.
+export async function removeOrderPart(formData: FormData) {
+  const orderId = str(formData, "orderId");
+  const orderPartId = str(formData, "orderPartId");
+  if (!orderPartId) return;
+
+  await prisma.$transaction(async (tx) => {
+    const op = await tx.orderPart.findUnique({ where: { id: orderPartId } });
+    if (!op) return;
+    await tx.orderPart.delete({ where: { id: orderPartId } });
+    await tx.sparePart.update({
+      where: { id: op.sparePartId },
+      data: { stock: { increment: op.quantity } },
+    });
+  });
+
+  revalidatePath(`/admin/ordenes/${orderId}`);
+  revalidatePath("/admin/repuestos");
+}
+
+// --- Payment (pago) -----------------------------------------------------
+
+function asMethod(value: string): PaymentMethod {
+  return (PAYMENT_METHOD_ORDER as string[]).includes(value)
+    ? (value as PaymentMethod)
+    : "CASH";
+}
+
+// Register or update the payment for an order. Total is computed server-side
+// from labor + parts − discount (never trust a client-sent total).
+export async function savePayment(formData: FormData) {
+  const orderId = str(formData, "orderId");
+  if (!orderId) return;
+
+  const method = asMethod(str(formData, "method"));
+  const discountBs = Math.max(0, num(formData, "discountBs") ?? 0);
+  const markPaid = str(formData, "status") === "PAID";
+
+  const order = await prisma.repairOrder.findUnique({
+    where: { id: orderId },
+    include: { parts: true },
+  });
+  if (!order) return;
+
+  const partsTotal = order.parts.reduce((s, p) => s + p.unitPriceBs * p.quantity, 0);
+  const totalBs = Math.max(0, (order.laborCost ?? 0) + partsTotal - discountBs);
+
+  await prisma.payment.upsert({
+    where: { repairOrderId: orderId },
+    create: {
+      repairOrderId: orderId,
+      method,
+      discountBs,
+      totalBs,
+      status: markPaid ? "PAID" : "PENDING",
+      paidAt: new Date(),
+    },
+    update: {
+      method,
+      discountBs,
+      totalBs,
+      status: markPaid ? "PAID" : "PENDING",
+    },
+  });
+
+  revalidatePath(`/admin/ordenes/${orderId}`);
+  revalidatePath("/admin");
+  revalidatePath("/admin/reportes");
 }
