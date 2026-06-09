@@ -96,10 +96,33 @@ npm run dev
 | Problema | Solución |
 |---|---|
 | `npm` o `node` “no se reconoce…” | Cierren y vuelvan a abrir la terminal después de instalar Node. Si sigue, reinstalen Node y reinicien la PC. |
+| `npm` falla con “**no se puede cargar el archivo npm.ps1… la ejecución de scripts está deshabilitada**” | Node está bien; es PowerShell que bloquea los scripts. Solución abajo: **«Error de PowerShell»**. |
 | SmartScreen bloquea el instalador de Node | **Más información → Ejecutar de todas formas**. |
 | El ZIP no abre los archivos | Clic derecho en el ZIP → **Extraer todo** (no abran “dentro” del ZIP). |
 | “No se puede acceder a este sitio” en localhost | Esperen a que la terminal diga **Ready** y recarguen con **F5**. |
 | Quieren que el **QR** abra en el celular del público | En el archivo `.env` pongan `APP_URL="http://IP-DE-LA-LAPTOP:3000"` (la IP del Wi-Fi de la laptop) y vuelvan a `npm run dev`. |
+
+### Error de PowerShell: «no se puede cargar el archivo npm.ps1…»
+
+Si al escribir `npm install` (o `npm --version`) aparece un error rojo parecido a:
+
+> *No se puede cargar el archivo … npm.ps1 porque la ejecución de scripts está deshabilitada en este sistema (UnauthorizedAccess).*
+
+**No es culpa de Node ni de npm.** Es la política de seguridad de PowerShell (`ExecutionPolicy`), que por defecto en Windows viene en `Restricted` y bloquea el pequeño script `.ps1` que npm trae. Node y Git siguen estando bien instalados.
+
+**Solución (recomendada, no necesita administrador):** abran PowerShell y peguen:
+```powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+```
+Cuando pregunte, confirmen con **`S`** (o **`Y`** en inglés). Luego **cierren y abran una nueva ventana de PowerShell** y prueben `npm --version`: ya debería funcionar.
+
+- Como es `-Scope CurrentUser`, solo afecta a su usuario y **no requiere administrador**.
+- `RemoteSigned` permite scripts creados localmente (como el de npm) y bloquea los no firmados de internet — es la opción segura y definitiva: se pone una vez y listo.
+
+**Alternativa solo para esta sesión** (si no quieren cambiar nada de forma permanente; se revierte al cerrar la ventana):
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+```
 
 ---
 
