@@ -90,8 +90,14 @@ export default async function StatusPage({
               <dd className="text-zinc-800 dark:text-zinc-200">
                 {order.device.customer.name}
               </dd>
-              <dt className="text-zinc-500 dark:text-zinc-400">Descripción</dt>
+              <dt className="text-zinc-500 dark:text-zinc-400">Falla reportada</dt>
               <dd className="text-zinc-800 dark:text-zinc-200">{order.description}</dd>
+              {order.diagnosis ? (
+                <>
+                  <dt className="text-zinc-500 dark:text-zinc-400">Diagnóstico</dt>
+                  <dd className="text-zinc-800 dark:text-zinc-200">{order.diagnosis}</dd>
+                </>
+              ) : null}
               <dt className="text-zinc-500 dark:text-zinc-400">Ingreso</dt>
               <dd className="text-zinc-800 dark:text-zinc-200">
                 {formatDate(order.createdAt)}

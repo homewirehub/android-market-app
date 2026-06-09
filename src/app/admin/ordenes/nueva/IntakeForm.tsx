@@ -121,14 +121,23 @@ export function IntakeForm({
         <legend className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
           Reparación
         </legend>
-        <Field label="Descripción del problema" htmlFor="description" required>
+        <Field label="Falla reportada (por el cliente)" htmlFor="description" required>
           <textarea
             id="description"
             name="description"
             required
-            rows={3}
+            rows={2}
             className={fieldClass}
-            placeholder="Falla reportada y observaciones de recepción…"
+            placeholder="Lo que reporta el cliente…"
+          />
+        </Field>
+        <Field label="Diagnóstico técnico (opcional)" htmlFor="diagnosis">
+          <textarea
+            id="diagnosis"
+            name="diagnosis"
+            rows={2}
+            className={fieldClass}
+            placeholder="Resultado de la revisión técnica, si ya se diagnosticó…"
           />
         </Field>
         <div className="grid gap-4 sm:grid-cols-3">

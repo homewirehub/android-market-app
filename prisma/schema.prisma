@@ -75,7 +75,8 @@ model RepairOrder {
   id               String       @id @default(cuid())
   orderCode        String       @unique // human-readable, e.g. REP-2026-0001
   deviceId         String
-  description      String // falla reportada
+  description      String // falla reportada (lo que dice el cliente)
+  diagnosis        String? // diagnóstico técnico (lo que encuentra el técnico)
   priority         Priority     @default(MEDIUM)
   status           RepairStatus @default(NEW)
   estimatedCost    Float? // costo estimado en bolivianos (Bs)

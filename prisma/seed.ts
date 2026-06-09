@@ -208,11 +208,22 @@ async function main() {
 
     if (part) usedCount.set(part.id, (usedCount.get(part.id) ?? 0) + 1);
 
+    // Split the combined string into customer complaint vs technician work,
+    // and only set a diagnosis once the order has been diagnosed (not NEW).
+    const [falla, trabajo] = o.falla.split(" — ");
+    const diagnosis =
+      status === "NEW"
+        ? null
+        : trabajo
+          ? `Falla confirmada tras revisión. Trabajo: ${trabajo}.`
+          : "Falla confirmada tras revisión técnica.";
+
     const order = await prisma.repairOrder.create({
       data: {
         orderCode: `REP-2026-${String(i + 1).padStart(4, "0")}`,
         deviceId: devices[i].id,
-        description: o.falla,
+        description: falla,
+        diagnosis,
         priority: "MEDIUM",
         status,
         estimatedCost: subtotal,
