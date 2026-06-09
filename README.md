@@ -15,6 +15,18 @@ solicitudes) y un **lado administrador** (el personal ve y gestiona todas las
 
 ---
 
+## 📚 Documentación del proyecto / Project documentation
+| Archivo | Contenido |
+| --- | --- |
+| [`README.md`](README.md) | Setup, scripts, portabilidad (este archivo) |
+| [`STATUS.md`](STATUS.md) | Estado/progreso + revisión + mejoras posibles |
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | Blueprint de arquitectura y best practices (Lastenheft) |
+| [`GUIA_PRESENTACION.md`](GUIA_PRESENTACION.md) | Guía de presentación (no técnica) |
+| [`PRESENTATION_CHECKLIST.md`](PRESENTATION_CHECKLIST.md) | Checklist + guion de demo (5 min) |
+| [`DEMO_DATA.md`](DEMO_DATA.md) | Datos de ejemplo recomendados para la demo |
+
+---
+
 ## English
 
 ### Tech stack
