@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Android Market · Servicio Técnico Digital — Presentación</title>
+<style>
+  :root{
+    --brand:#059669; --brand-lt:#10b981; --dark:#0b1220; --dark-card:#16213a;
+    --ink:#121826; --muted:#667085; --pale:#e4f4ec; --border:#e3e8ee;
+    --light:#f5f8f6; --red:#e5533c; --redpale:#fce7e2;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:#000;font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  .deck{position:fixed;inset:0;overflow:hidden}
+  .slide{position:absolute;inset:0;display:flex;align-items:center;padding:5.5vh 6vw;opacity:0;visibility:hidden;transition:opacity .35s ease;overflow:hidden}
+  .slide.active{opacity:1;visibility:visible}
+  .slide.light{background:var(--light);color:var(--ink)}
+  .slide.dark{background:var(--dark);color:#fff}
+  .inner{width:100%;max-width:1200px;margin:0 auto}
+  .kicker{font-size:clamp(11px,1.05vw,13.5px);font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand);margin-bottom:.5em}
+  .dark .kicker{color:var(--brand-lt)}
+  h1{font-size:clamp(26px,4vw,46px);font-weight:800;line-height:1.08;margin:0 0 .1em;letter-spacing:-.01em}
+  .lead{font-size:clamp(14px,1.55vw,18px);line-height:1.5;color:var(--ink)}
+  .muted{color:var(--muted)}
+  .row{display:flex;gap:18px}
+  .grid{display:grid;gap:18px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .card{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 22px rgba(16,24,40,.06);padding:20px 22px}
+  .card h3{margin:.1em 0 .15em;font-size:clamp(15px,1.5vw,18px);font-weight:700}
+  .card p{margin:0;font-size:clamp(12px,1.25vw,14px);color:var(--muted);line-height:1.4}
+  .ic{flex:0 0 auto;width:52px;height:52px;border-radius:50%;background:var(--pale);color:var(--brand);display:flex;align-items:center;justify-content:center}
+  .ic svg{width:26px;height:26px}
+  .ic.red{background:var(--redpale);color:var(--red)}
+  .icon{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .chip{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+  .chip .ic{width:44px;height:44px}
+  .chip .ic svg{width:22px;height:22px}
+  .step{flex:1;min-width:0;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 22px rgba(16,24,40,.06);padding:16px 6px;text-align:center}
+  .num{width:46px;height:46px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;font-size:clamp(15px,1.6vw,19px);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+  .step b{font-size:clamp(11px,1.2vw,14px)}
+  .arrow{align-self:center;color:var(--brand-lt);font-size:clamp(18px,2vw,26px);font-weight:800}
+  /* dark helpers */
+  .dark .lead{color:#c7d2e0}
+  .stackbox{width:min(560px,80%);margin:0 auto;background:var(--dark-card);border:1px solid #2a3858;border-radius:12px;padding:16px;text-align:center;font-weight:700;font-size:clamp(14px,1.7vw,18px)}
+  .stackbox.brand{background:var(--brand);border-color:var(--brand)}
+  .down{color:var(--brand-lt);text-align:center;font-size:18px;margin:6px 0}
+  .dchip{display:flex;align-items:center;gap:10px;background:var(--dark-card);border:1px solid #2a3858;border-radius:30px;padding:10px 16px;font-weight:700;font-size:clamp(11px,1.2vw,13px)}
+  .dchip svg{width:18px;height:18px;color:var(--brand-lt);stroke-width:2}
+  .pill{display:inline-block;background:var(--brand);color:#fff;font-size:11px;font-weight:800;letter-spacing:.08em;padding:4px 10px;border-radius:20px}
+  /* misc */
+  .brandmark{width:60px;height:60px;border-radius:13px;background:var(--brand);display:flex;align-items:center;justify-content:center}
+  .brandmark svg{width:28px;height:28px;color:#fff;stroke-width:2}
+  .blob{position:absolute;border-radius:50%;filter:blur(2px);opacity:.16;background:var(--brand)}
+  .note{background:#fff;border:1.5px solid var(--brand);border-radius:12px;padding:16px 20px;font-size:clamp(12px,1.3vw,15px);line-height:1.45}
+  .note.pale{background:var(--pale)}
+  /* HUD */
+  #hud{position:fixed;right:16px;bottom:12px;z-index:50;display:flex;align-items:center;gap:12px;font-family:var(--sans);font-size:12px;color:#94a3b8}
+  #hud button{cursor:pointer;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#cbd5e1;border-radius:8px;padding:5px 9px;font-size:12px}
+  .slide.light ~ #hud{color:#94a3b8}
+  #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:50;font-size:11.5px;color:#94a3b8;transition:opacity .6s ease}
+  .footer{position:absolute;left:6vw;bottom:2.6vh;font-size:11px;color:var(--muted)}
+  .dark .footer{color:#7f8aa0}
+  @media (max-width:700px){ .g3,.g4{grid-template-columns:1fr 1fr} h1{font-size:30px} }
+</style>
+</head>
+<body>
+
+<!-- ====== ICON LIBRARY (inline, offline) ====== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M16 5.5a3 3 0 0 1 0 5.8M17 14.5a5.5 5.5 0 0 1 3.5 4.5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24"><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1Z"/><path d="M8 6H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><path d="M9 12h6M9 16h4"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2l-.3-2.5h-4l-.3 2.5a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.3 2.5h4l.3-2.5a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/></symbol>
+  <symbol id="i-money" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9v6M18 9v6"/></symbol>
+  <symbol id="i-pdf" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 16h4"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V4M4 20h16"/><path d="M8 16v-4M12 16V8M16 16v-6"/></symbol>
+  <symbol id="i-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 14v.01M14 20h.01M17 20h4v-3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2Z"/><path d="M18 16H7a2 2 0 0 0-2 2"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.3 2.3L16 9"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></symbol>
+  <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 8.5a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0M8 15.5a6 6 0 0 1 8 0"/><circle cx="12" cy="19" r="1"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M9 13a4 4 0 0 0 6 .5l3-3a4 4 0 0 0-5.7-5.7L11 6"/><path d="M15 11a4 4 0 0 0-6-.5l-3 3a4 4 0 0 0 5.7 5.7L13 18"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 4v4h4M12 8v4l3 2"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7Z"/></symbol>
+  <symbol id="i-tags" viewBox="0 0 24 24"><path d="M3 7v5l8 8 6-6-8-8H3Z"/><circle cx="7" cy="11" r="1.2"/></symbol>
+  <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 20h20"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.2 5.2L4 17l3 3 5.5-5.5a4 4 0 0 0 5.2-5.2l-2.6 2.6-2.4-2.4 2.6-2.6Z"/></symbol>
+</defs></svg>
+<script>function I(id,cls){return '<svg class="'+(cls||'icon')+'"><use href="#'+id+'"/></svg>'}</script>
+
+<div class="deck" id="deck"></div>
+
+<div id="hud"><button id="fs" title="Pantalla completa (F)">⛶ Pantalla completa</button><span id="counter">1 / 16</span></div>
+<div id="hint">← → para navegar · clic para avanzar</div>
+
+<script>
+const D = [];
+
+/* 1 PORTADA */
+D.push(`<section class="slide dark">
+  <div class="blob" style="width:520px;height:520px;right:-120px;top:-180px"></div>
+  <div class="blob" style="width:340px;height:340px;right:120px;bottom:-120px;background:var(--brand-lt)"></div>
+  <div class="inner">
+    <div class="brandmark">${I('i-wrench')}</div>
+    <h1 style="font-size:clamp(40px,7vw,76px);margin-top:.35em">Android Market</h1>
+    <div style="font-size:clamp(20px,2.8vw,30px);font-weight:800;color:var(--brand-lt)">Servicio Técnico Digital</div>
+    <p class="lead" style="margin-top:.7em">Sistema de gestión de reparaciones que funciona sin internet</p>
+    <div style="width:200px;height:2px;background:var(--brand);margin:24px 0 12px"></div>
+    <div style="font-weight:700">Rurrenabaque, Beni · Bolivia</div>
+    <div style="color:#8fa0b5;font-size:13px;margin-top:6px">Tecnología de la Información II · Carlos Paz · Noé Flores · Esequiel Flores · Yeis Chipunavi · Daniel Gómez</div>
+  </div>
+</section>`);
+
+/* 2 PROBLEMA */
+const probs=[['Órdenes perdidas','Equipos sin seguimiento, nadie sabe dónde están.'],['Estados poco claros','No se sabe en qué etapa va cada reparación.'],['Sin estadísticas','No se sabe cuánto se gana ni qué se repara más.'],['Cliente sin información','Llama una y otra vez para preguntar.']];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">El problema</div><h1>Hoy se gestiona con papel, WhatsApp y memoria</h1>
+  <div class="grid g2" style="margin-top:26px">
+  ${probs.map(p=>`<div class="card row"><div class="ic red">${I('i-x')}</div><div><h3>${p[0]}</h3><p>${p[1]}</p></div></div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 3 SOLUCIÓN */
+const sol=[['i-wifi','Funciona sin internet','Ideal para Rurrenabaque.'],['i-laptop','En una sola laptop','Sin servidores ni nube.'],['i-tags','Sin costos mensuales','Cero gastos de hosting.']];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">La solución</div><h1>Una aplicación web que digitaliza todo el proceso</h1>
+  <div class="row" style="margin-top:26px;gap:42px;align-items:flex-start">
+    <p class="lead" style="flex:1.1;font-size:clamp(15px,1.7vw,19px)">El cliente y su equipo se registran una sola vez. Desde la recepción hasta la entrega, toda la información queda en un solo lugar — y el cliente puede ver el estado en línea.</p>
+    <div style="flex:1;display:flex;flex-direction:column;gap:14px">
+    ${sol.map(s=>`<div class="chip"><div class="ic">${I(s[0])}</div><div><h3 style="margin:0;font-size:15px">${s[1]}</h3><p style="font-size:12.5px">${s[2]}</p></div></div>`).join('')}
+    </div>
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 4 PROCESO */
+const steps=['Recepción','Diagnóstico','Reparación','Inventario','Pago','Entrega','Reportes'];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">El proceso digitalizado</div><h1>Del ingreso a la entrega, todo en un solo lugar</h1>
+  <div class="row" style="margin-top:42px;gap:4px;align-items:stretch">
+  ${steps.map((s,i)=>`<div class="step"><div class="num">${i+1}</div><b>${s}</b></div>${i<steps.length-1?'<div class="arrow">›</div>':''}`).join('')}
+  </div>
+  <p class="muted" style="text-align:center;margin-top:30px;font-style:italic">Cada paso queda registrado con fecha, hora y técnico.</p>
+  </div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 5 FUNCIONES */
+const fns=[['i-users','Clientes'],['i-phone','Equipos'],['i-clip','Órdenes'],['i-cog','Técnicos'],['i-box','Inventario'],['i-money','Pagos'],['i-pdf','Comprobante PDF'],['i-chart','Dashboard'],['i-qr','Estado por QR'],['i-search','Búsqueda global'],['i-db','Respaldo de datos'],['i-book','Documentación']];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Funciones</div><h1>Todo lo que ya está construido</h1>
+  <div class="grid g3" style="margin-top:22px;gap:14px">
+  ${fns.map(f=>`<div class="card row" style="align-items:center;padding:14px 16px"><div class="ic" style="width:44px;height:44px">${I(f[0])}</div><h3 style="margin:0">${f[1]}</h3></div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 6 DOS LADOS */
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Dos lados</div><h1>Una parte para el cliente, otra para el taller</h1>
+  <div class="grid g2" style="margin-top:24px">
+    <div class="card" style="padding:26px">
+      <div class="row" style="align-items:center;gap:14px"><div class="brandmark" style="width:50px;height:50px;border-radius:12px">${I('i-qr')}</div><h3 style="font-size:clamp(17px,2vw,22px);margin:0">Lado Cliente</h3></div>
+      <ul style="margin:16px 0 12px;padding-left:20px;line-height:1.9;font-size:clamp(13px,1.4vw,15px)"><li>Solicitar una reparación</li><li>Consultar el estado con código o QR</li><li>Ver costo, diagnóstico e historial</li></ul>
+      <p style="font-style:italic" class="muted">Desde el navegador, sin instalar nada.</p>
+    </div>
+    <div class="card" style="padding:26px">
+      <div class="row" style="align-items:center;gap:14px"><div class="brandmark" style="width:50px;height:50px;border-radius:12px;background:var(--dark-card)">${I('i-cog')}</div><h3 style="font-size:clamp(17px,2vw,22px);margin:0">Lado Administración</h3></div>
+      <ul style="margin:16px 0 12px;padding-left:20px;line-height:1.9;font-size:clamp(13px,1.4vw,15px)"><li>Registrar y gestionar órdenes</li><li>Inventario, pagos y reportes</li><li>Generar comprobantes en PDF</li></ul>
+      <p style="font-style:italic" class="muted">El personal gestiona todo el taller.</p>
+    </div>
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 7 ARQUITECTURA */
+const stack=[['Navegador',0],['Next.js',0],['Prisma',0],['SQLite (archivo local)',1]];
+const props=['Offline','Una sola laptop','Sin costos mensuales','Datos propios'];
+D.push(`<section class="slide dark"><div class="inner">
+  <div class="kicker">Arquitectura</div><h1>Simple, robusta y sin internet</h1>
+  <div style="margin-top:26px">
+  ${stack.map((s,i)=>`<div class="stackbox ${s[1]?'brand':''}">${s[0]}</div>${i<stack.length-1?'<div class="down">↓</div>':''}`).join('')}
+  </div>
+  <div class="row" style="justify-content:center;gap:14px;margin-top:24px;flex-wrap:wrap">
+  ${props.map(p=>`<div class="dchip">${I('i-check')}<span>${p}</span></div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 8 BUENAS PRÁCTICAS */
+const bp=[['i-wifi','Offline-first','Funciona sin internet — perfecto para Rurrenabaque.'],['i-link','Un solo lugar para cada dato','Sin información duplicada ni contradictoria.'],['i-clip','Estados controlados','Los reportes y estadísticas funcionan de verdad.'],['i-history','Historial completo','Cada cambio queda con fecha, hora y técnico.']];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Buenas prácticas</div><h1>Decisiones que lo hacen sólido</h1>
+  <div class="grid g2" style="margin-top:26px">
+  ${bp.map(b=>`<div class="card row"><div class="ic">${I(b[0])}</div><div><h3>${b[1]}</h3><p>${b[2]}</p></div></div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 9 DEMOSTRACIÓN */
+const demo=['El cliente llega al taller','Se crea la orden (REP-2026-…)','Se agrega el repuesto usado','Se actualiza el estado','Se registra el pago (total)','Se genera el comprobante (PDF + QR)','El cliente consulta el estado en línea'];
+D.push(`<section class="slide dark"><div class="inner">
+  <div class="kicker">Demostración</div><h1>Lo que verán en vivo (5 minutos)</h1>
+  <div class="grid g2" style="margin-top:24px;column-gap:46px;row-gap:14px">
+  ${demo.map((s,i)=>`<div class="row" style="align-items:center;gap:14px"><div class="num" style="margin:0;width:40px;height:40px">${i+1}</div><span style="color:#dce5f0;font-size:clamp(13px,1.5vw,16px)">${s}</span></div>`).join('')}
+  <div></div>
+  <div class="stackbox brand" style="width:100%;margin:0;padding:14px;font-size:clamp(12px,1.4vw,15px)">Y el Panel muestra los indicadores del taller</div>
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 10 DIVIDER */
+D.push(`<section class="slide dark"><div class="blob" style="width:560px;height:560px;left:-200px;bottom:-160px"></div><div class="inner">
+  <div style="width:180px;height:2px;background:var(--brand-lt);margin-bottom:18px"></div>
+  <h1 style="font-size:clamp(32px,5.2vw,56px);max-width:14ch">De la presentación al producto real</h1>
+  <p class="lead" style="margin-top:18px;max-width:60ch">No es solo un proyecto de la universidad: es la base de un producto real para talleres de reparación.</p>
+  </div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 11 ETAPAS */
+const stg=[['1','Una laptop en el taller','Hoy. Recepción, técnico y jefe. Sin costos.',1],['2','Varios equipos en el taller','Todos acceden por la red local (WiFi).',0],['3','App instalable (PWA)','En celular, tablet y PC. Sin Play Store.',0],['4','Vender a otros talleres','El mismo sistema para muchos talleres — un producto.',0],['5','Plataforma en la nube (SaaS)','Varios talleres, pago mensual.',0]];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Evolución</div><h1>Cinco etapas de crecimiento</h1>
+  <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px">
+  ${stg.map(s=>`<div class="card row" style="align-items:center;padding:14px 18px;${s[3]?'background:var(--pale);border-color:var(--brand)':''}">
+    <div class="num" style="margin:0;width:42px;height:42px">${s[0]}</div>
+    <b style="flex:0 0 34%;font-size:clamp(14px,1.6vw,17px)">${s[1]}</b>
+    <span class="muted" style="flex:1;font-size:clamp(12px,1.35vw,14px)">${s[2]}</span>
+    ${s[3]?'<span class="pill">AHORA</span>':''}
+  </div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 12 COMPANY */
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Decisión clave</div><h1>Preparado para muchos talleres</h1>
+  <div class="row" style="margin-top:24px;align-items:center;gap:20px">
+    <div class="card" style="flex:1;padding:22px">
+      <div class="kicker" style="color:var(--muted)">Hoy</div>
+      ${['Cliente','Equipo','Orden de reparación'].map(t=>`<div style="border:1px solid var(--border);border-radius:9px;padding:11px 14px;margin-top:10px;font-weight:700">${t}</div>`).join('')}
+    </div>
+    <div class="arrow" style="font-size:34px;color:var(--brand)">→</div>
+    <div class="card" style="flex:1.05;padding:22px;background:var(--pale);border-color:#bfe6d4">
+      <div class="kicker">Mañana · Multi-taller</div>
+      <div style="background:var(--brand);color:#fff;border-radius:9px;padding:11px 14px;margin:10px 0 12px;font-weight:700">Company (cada taller)</div>
+      <ul style="margin:0;padding-left:20px;line-height:1.9">${['Clientes','Equipos · Órdenes','Inventario · Pagos'].map(t=>`<li>${t}</li>`).join('')}</ul>
+    </div>
+  </div>
+  <div class="note" style="margin-top:22px"><b>Cada taller tiene su companyId.</b> Una misma app puede atender muchos talleres. <span class="muted" style="font-style:italic">Planificado y documentado — todavía no construido (no se necesita aún).</span></div>
+  </div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 13 ROADMAP */
+const ph=[['Fase 1','HECHO',['Detalle de orden','Historia y QR','PDF de comprobante','Inventario y pagos'],1],['Fase 2','Siguiente',['Historial de inventario','Reportes por fecha','Restaurar respaldo'],0],['Fase 3','Después',['Inicio de sesión','Roles de usuario','Varios usuarios'],0],['Fase 4','Visión',['WhatsApp','Sincronización en la nube','Varias sucursales'],0]];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Hoja de ruta</div><h1>Qué sigue después de la presentación</h1>
+  <div class="grid g4" style="margin-top:22px;gap:16px">
+  ${ph.map(p=>`<div class="card" style="padding:0;overflow:hidden;${p[3]?'background:var(--pale)':''}">
+    <div style="background:${p[3]?'var(--brand)':'var(--dark-card)'};color:#fff;padding:14px 16px">
+      <div style="font-size:clamp(15px,1.7vw,19px);font-weight:800">${p[0]}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${p[3]?'#d6f5e8':'#9fb0c8'}">${p[1]}</div>
+    </div>
+    <ul style="margin:14px 16px;padding-left:18px;line-height:1.95;font-size:clamp(12px,1.3vw,14px)">${p[2].map(x=>`<li>${x}</li>`).join('')}</ul>
+  </div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 14 NO HICIMOS */
+const no=['Inicio de sesión','Roles','Docker','Nube','WhatsApp','Varias sucursales','Refactor total de inventario','Funciones de SaaS'];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Enfoque</div><h1>Lo que NO hicimos (a propósito)</h1>
+  <div class="grid g2" style="margin-top:22px;gap:12px">
+  ${no.map(n=>`<div class="row" style="align-items:center;gap:12px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 16px"><span style="color:var(--red);display:flex">${I('i-x')}</span><span style="font-size:clamp(13px,1.4vw,15px)">${n}</span></div>`).join('')}
+  </div>
+  <div class="note pale" style="margin-top:20px"><b>Evitamos complejidad innecesaria.</b> Primero el valor real para el taller; lo demás llega cuando se necesite.</div>
+  </div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 15 BENEFICIOS */
+const ben=[['i-bolt','Digitalización total','Sin papel, todo en un lugar.'],['i-history','Trazabilidad completa','Se sabe qué pasó y cuándo.'],['i-qr','Menos llamadas','El cliente consulta en línea.'],['i-box','Control de inventario','Stock y alertas de reabastecer.'],['i-chart','Decisiones con datos','Ingresos y reparaciones a la vista.'],['i-tags','Sin costos mensuales','Funciona en una sola laptop.']];
+D.push(`<section class="slide light"><div class="inner">
+  <div class="kicker">Beneficios</div><h1>Valor para el negocio</h1>
+  <div class="grid g3" style="margin-top:24px">
+  ${ben.map(b=>`<div class="card row"><div class="ic" style="width:46px;height:46px">${I(b[0])}</div><div><h3 style="font-size:15px">${b[1]}</h3><p>${b[2]}</p></div></div>`).join('')}
+  </div></div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* 16 CONCLUSIÓN */
+const plan=['Iniciar la demo','Mostrar el flujo','Responder preguntas'];
+D.push(`<section class="slide dark"><div class="blob" style="width:560px;height:560px;right:-160px;bottom:-160px"></div><div class="inner">
+  <div class="brandmark" style="width:54px;height:54px">${I('i-wrench')}</div>
+  <h1 style="font-size:clamp(30px,5vw,52px);margin-top:.4em">De proyecto académico a producto real</h1>
+  <div class="row" style="margin-top:26px;gap:16px;flex-wrap:wrap">
+  ${plan.map((p,i)=>`<div class="dchip" style="border-radius:12px;padding:16px 18px;font-size:clamp(13px,1.5vw,16px)"><span class="num" style="margin:0;width:34px;height:34px;font-size:14px">${i+1}</span><span style="color:#fff">${p}</span></div>`).join('')}
+  </div>
+  <p class="lead" style="margin-top:24px">Funciona sin internet · en una sola laptop · listo para presentar</p>
+  <div style="font-size:clamp(20px,2.6vw,28px);font-weight:800;color:var(--brand-lt);margin-top:8px">¡Gracias!</div>
+  </div><div class="footer">Android Market · Servicio Técnico Digital</div></section>`);
+
+/* ===== render + navigation ===== */
+document.getElementById('deck').innerHTML = D.join('');
+const slides=[...document.querySelectorAll('.slide')];
+const counter=document.getElementById('counter');
+let i=0;
+function show(n){ i=Math.max(0,Math.min(slides.length-1,n)); slides.forEach((s,k)=>s.classList.toggle('active',k===i)); counter.textContent=(i+1)+' / '+slides.length; location.hash=i+1; }
+function next(){show(i+1)} function prev(){show(i-1)}
+addEventListener('keydown',e=>{
+  if(['ArrowRight',' ','PageDown','Enter'].includes(e.key)){e.preventDefault();next();}
+  else if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){e.preventDefault();prev();}
+  else if(e.key==='Home'){show(0)} else if(e.key==='End'){show(slides.length-1)}
+  else if(e.key.toLowerCase()==='f'){toggleFs()}
+});
+addEventListener('click',e=>{ if(e.target.closest('#hud'))return; (e.clientX>innerWidth*0.5?next:prev)(); });
+function toggleFs(){ if(!document.fullscreenElement){document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()} else {document.exitFullscreen&&document.exitFullscreen()} }
+document.getElementById('fs').addEventListener('click',e=>{e.stopPropagation();toggleFs()});
+addEventListener('hashchange',()=>{const h=(parseInt(location.hash.replace('#',''))||1)-1; if(h!==i) show(h);});
+const start=parseInt(location.hash.replace('#',''))||1; show(start-1);
+setTimeout(()=>{const h=document.getElementById('hint');if(h)h.style.opacity='0';},6000);
+</script>
+</body>
+</html>
