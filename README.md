@@ -26,6 +26,8 @@ solicitudes) y un **lado administrador** (el personal ve y gestiona todas las
 | [`DEMO_DATA.md`](DEMO_DATA.md) | Datos de ejemplo recomendados para la demo |
 | [`PRESENTACION_Android_Market.pptx`](PRESENTACION_Android_Market.pptx) | Presentación (PowerPoint, 16 diapositivas, español) |
 | [`presentacion.html`](presentacion.html) | Misma presentación en HTML — se abre en cualquier navegador, sin Office, sin internet (← → o clic para navegar, **F** pantalla completa) |
+| [`defensa/Presentacion_Android_Market.pptx`](defensa/Presentacion_Android_Market.pptx) | Presentación de defensa del equipo (enfoque académico: SI, DER, trazabilidad) — revisada |
+| [`defensa/Guia_Defensa_Android_Market.docx`](defensa/Guia_Defensa_Android_Market.docx) | Guía de defensa: mensaje central, argumentos, banco de preguntas y reparto de roles |
 
 ---
 
