@@ -29,6 +29,18 @@ Esto es **solo para quien va a mostrar la app funcionando** en la defensa. Una s
 
 ### Paso 1 — Instalar los dos programas necesarios (una sola vez)
 
+#### Opción A — Rápida con winget (recomendada, Windows 11 ya lo trae)
+1. Menú Inicio → escribir **PowerShell** → abrir.
+2. Pegar estos dos comandos (uno por uno):
+   ```powershell
+   winget install OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+   winget install Git.Git --accept-source-agreements --accept-package-agreements
+   ```
+3. **Cerrar y volver a abrir PowerShell** (para que tome los programas).
+   - *(Si `winget` no se reconoce, instalen “App Installer” desde la Microsoft Store, o usen la Opción B.)*
+
+#### Opción B — Manual (si no quieren usar winget)
+
 **1.1 Node.js** (hace que funcione `npm`)
 1. Entren a **https://nodejs.org** y descarguen la versión **LTS** (botón izquierdo), el instalador **.msi** para Windows.
 2. Ejecuten el instalador → **Next → Next → Install** (dejen todo por defecto).
