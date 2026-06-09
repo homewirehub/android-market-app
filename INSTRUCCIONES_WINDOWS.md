@@ -27,16 +27,38 @@ No necesitan instalar nada. Solo descargar y abrir los archivos.
 
 Esto es **solo para quien va a mostrar la app funcionando** en la defensa. Una sola laptop.
 
-### Paso 1 — Instalar Node.js (una sola vez)
+### Paso 1 — Instalar los dos programas necesarios (una sola vez)
+
+**1.1 Node.js** (hace que funcione `npm`)
 1. Entren a **https://nodejs.org** y descarguen la versión **LTS** (botón izquierdo), el instalador **.msi** para Windows.
 2. Ejecuten el instalador → **Next → Next → Install** (dejen todo por defecto).
    - Si aparece **SmartScreen** (“Windows protegió tu PC”): **Más información → Ejecutar de todas formas**.
-3. Listo. Para comprobar, abran una terminal (Paso 2) y escriban `node --version` — debe mostrar un número (v20 o superior).
 
-### Paso 2 — Abrir una terminal en la carpeta del proyecto
-1. Abran la carpeta del proyecto extraído en el **Explorador de archivos**.
-2. Clic derecho dentro de la carpeta → **“Abrir en Terminal”**.
-   - (Alternativa: en la barra de direcciones del Explorador escriban `powershell` y Enter.)
+**1.2 Git** (sirve para descargar y actualizar el proyecto)
+1. Entren a **https://git-scm.com/download/win** (la descarga inicia sola).
+2. Ejecuten el instalador → **Next** a todo (los valores por defecto están bien) → **Install**.
+
+**Reinicien la PC** después de instalar (recomendado).
+
+**Comprobar que quedó todo instalado:** abran el menú Inicio, escriban **PowerShell**, ábranlo y escriban:
+```powershell
+node --version
+npm --version
+git --version
+```
+Cada uno debe mostrar un número. Si alguno dice “no se reconoce”, reinstálenlo y reinicien la PC.
+
+### Paso 2 — Descargar el proyecto
+
+**Opción recomendada (con Git):** en PowerShell escriban:
+```powershell
+cd Desktop
+git clone https://github.com/homewirehub/android-market-app.git
+cd android-market-app
+```
+(Quedará en el Escritorio, dentro de la carpeta `android-market-app`, y ya estarán adentro.)
+
+**Opción sin Git (ZIP):** descarguen el ZIP (ver sección A), extráiganlo, abran la carpeta y hagan clic derecho dentro → **“Abrir en Terminal”**.
 
 ### Paso 3 — Instalar y arrancar (escriban los comandos uno por uno)
 ```powershell
