@@ -1,4 +1,5 @@
 // Admin: customers list. Reads customers from the DB.
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader, Table, Th, Td } from "@/components/ui";
 
@@ -29,7 +30,14 @@ export default async function AdminCustomersPage() {
         <tbody>
           {customers.map((c) => (
             <tr key={c.id} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/40">
-              <Td>{c.name}</Td>
+              <Td>
+                <Link
+                  href={`/admin/clientes/${c.id}`}
+                  className="font-medium text-brand-600 hover:underline dark:text-brand-500"
+                >
+                  {c.name}
+                </Link>
+              </Td>
               <Td>{c.phone ?? "—"}</Td>
               <Td>{c.email ?? "—"}</Td>
               <Td>{c.address ?? "—"}</Td>
