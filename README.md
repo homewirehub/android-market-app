@@ -18,6 +18,7 @@ solicitudes) y un **lado administrador** (el personal ve y gestiona todas las
 ## 📚 Documentación del proyecto / Project documentation
 | Archivo | Contenido |
 | --- | --- |
+| [`INSTRUCCIONES_WINDOWS.md`](INSTRUCCIONES_WINDOWS.md) | **Cómo descargar y ejecutar en Windows 11** (paso a paso, español) |
 | [`README.md`](README.md) | Setup, scripts, portabilidad (este archivo) |
 | [`STATUS.md`](STATUS.md) | Estado/progreso + revisión + mejoras posibles |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | Blueprint de arquitectura y best practices (Lastenheft) |
