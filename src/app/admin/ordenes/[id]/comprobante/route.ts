@@ -102,7 +102,10 @@ export async function GET(
     ["Teléfono", pdfText(order.device.customer.phone)],
     ["Equipo", pdfText(`${order.device.brand} ${order.device.model} (${order.device.type})`)],
     ["N.º de serie", pdfText(order.device.serialNumber)],
-    ["Problema", pdfText(order.description)],
+    ["Falla reportada", pdfText(order.description)],
+    ...(order.diagnosis
+      ? ([["Diagnóstico", pdfText(order.diagnosis)]] as [string, string][])
+      : []),
     ["Estado", pdfText(statusLabel(order.status))],
     ["Entrega estimada", pdfText(formatDateShort(order.estimatedReadyAt))],
     [

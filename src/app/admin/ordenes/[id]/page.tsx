@@ -121,6 +121,9 @@ export default async function OrderDetailPage({
               <DetailRow label="IMEI / serie">{order.device.serialNumber ?? "—"}</DetailRow>
               <DetailRow label="Accesorios">{order.device.accessories ?? "—"}</DetailRow>
               <DetailRow label="Falla reportada">{order.description}</DetailRow>
+              <DetailRow label="Diagnóstico">
+                {order.diagnosis ?? <span className="text-zinc-400">Pendiente</span>}
+              </DetailRow>
               <DetailRow label="Prioridad">{priorityLabel(order.priority)}</DetailRow>
               <DetailRow label="Entrega estimada">{formatDateShort(order.estimatedReadyAt)}</DetailRow>
               <DetailRow label="Estado">
@@ -366,6 +369,16 @@ export default async function OrderDetailPage({
                     </option>
                   ))}
                 </select>
+              </Field>
+              <Field label="Diagnóstico técnico" htmlFor="diagnosis">
+                <textarea
+                  id="diagnosis"
+                  name="diagnosis"
+                  rows={2}
+                  defaultValue={order.diagnosis ?? ""}
+                  className={fieldClass}
+                  placeholder="Resultado de la revisión técnica…"
+                />
               </Field>
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Mano de obra (Bs)" htmlFor="laborCost">

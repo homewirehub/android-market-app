@@ -72,6 +72,7 @@ export async function updateOrderStatus(formData: FormData) {
   const estimatedCost = num(formData, "estimatedCost");
   const laborCost = num(formData, "laborCost");
   const estimatedReadyAt = date(formData, "estimatedReadyAt");
+  const diagnosis = str(formData, "diagnosis");
 
   await prisma.$transaction(async (tx) => {
     await tx.repairOrder.update({
@@ -83,6 +84,7 @@ export async function updateOrderStatus(formData: FormData) {
         ...(estimatedCost !== null ? { estimatedCost } : {}),
         ...(laborCost !== null ? { laborCost } : {}),
         ...(estimatedReadyAt !== null ? { estimatedReadyAt } : {}),
+        ...(formData.has("diagnosis") ? { diagnosis: diagnosis || null } : {}),
       },
     });
     await tx.repairStatusHistory.create({
@@ -162,6 +164,7 @@ export async function createIntakeOrder(formData: FormData) {
           create: {
             orderCode: code,
             description,
+            diagnosis: str(formData, "diagnosis") || null,
             priority,
             status,
             estimatedCost: num(formData, "estimatedCost"),
