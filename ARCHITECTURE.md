@@ -166,15 +166,15 @@ Kunde braucht keine 20 Menüpunkte.
 
 ---
 
-## 8. Suche  `🟡`
+## 8. Suche  `✅`
 
 Best Practice: **eine** globale Suchleiste über mehrere Felder gleichzeitig.
 
-- **Heute:** Suche in `/admin/ordenes` über **Auftragscode, Kundenname,
-  Marke/Modell**.
-- **Zielbild (`🔭`):** zusätzlich **Telefon** und **Seriennummer/IMEI**;
-  optional akzent-unempfindlich (heute ignoriert SQLite-`LIKE` nur ASCII-Groß-/
-  Kleinschreibung, „vasquez" ≠ „Vásquez").
+- **Heute:** globale Suche in der Admin-Topbar (`/admin/buscar`) über
+  **Auftragscode, Kundenname, Telefon, Seriennummer/IMEI, Marke/Modell** –
+  Ergebnisse getrennt nach *Clientes* und *Órdenes*.
+- 🔭 **Offen:** akzent-unempfindlich (heute ignoriert SQLite-`LIKE` nur ASCII-
+  Groß-/Kleinschreibung, „vasquez" ≠ „Vásquez").
 
 ---
 
@@ -204,11 +204,12 @@ scannt → Browser → Status, **ohne Login**.
 
 Alle Daten liegen in **einer Datei**: `prisma/dev.db`.
 
-- **Heute:** gitignoriert; per `npm run db:reset` reproduzierbar aus dem Seed.
-- **Betriebliche Routine (`🔭`, dringend empfohlen):** jeden Abend die Datei auf
-  **USB-Stick** kopieren. Später NAS oder verschlüsseltes Cloud-Backup. *(Ein
-  einfacher „Datenbank exportieren/importieren"-Knopf im Admin ist als Mehrwert
-  in `STATUS.md` notiert.)*
+- **Heute (`✅`):** **Export-Knopf** im Admin („Respaldar datos" → `/admin/respaldo`)
+  lädt die SQLite-Datei als datiertes `.db` herunter (mit WAL-Checkpoint). Datei
+  ist gitignoriert; per `npm run db:reset` aus dem Seed reproduzierbar.
+- **Betriebliche Routine (empfohlen):** das exportierte `.db` jeden Abend auf
+  **USB-Stick** sichern. Später NAS oder verschlüsseltes Cloud-Backup.
+- 🔭 **Offen:** **Restore/Import** eines `.db` über die Oberfläche.
 
 ---
 

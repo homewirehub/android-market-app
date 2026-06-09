@@ -2,6 +2,15 @@
 
 ## English
 
+### ✅ Done — High-value business features
+- **Technician diagnosis** (`RepairOrder.diagnosis`) separate from the customer's
+  reported problem — shown on detail, PDF and the public status page.
+- **Customer detail page** (`/admin/clientes/[id]`) with the customer's full
+  repair history and total paid.
+- **Global search** (`/admin/buscar` + topbar): order code, customer name,
+  **phone number**, **serial number**, brand and model.
+- **Database backup/export** (`/admin/respaldo`): one-click dated `.db` download.
+
 ### ✅ Done — Inventory, payments & reports (matches the academic proposal)
 - **Spare-parts inventory** (`/admin/repuestos`): parts with category, price,
   stock and minimum; low-stock "reabastecer" alerts; add part and restock.
@@ -105,9 +114,9 @@
    technicians — today there is create + status/parts/payment updates, but no edit
    or delete screens.
 2. **Authentication** for the admin area (today `/admin` is open on the machine).
-3. **Accent-insensitive search** — SQLite `LIKE` only ignores ASCII case, so
-   "vasquez" does not match "Vásquez".
-4. **Backup / export** of the SQLite file (one-click copy) and re-import.
+3. **Accent-insensitive search** — global search exists; SQLite `LIKE` only
+   ignores ASCII case, so "vasquez" still does not match "Vásquez".
+4. **Restore/import** a backup `.db` from the UI (export already exists).
 5. **Richer reports** — date ranges, income per technician, per-period charts.
 6. **Order-code safety** — guard the (rare) race if two orders are created at the
    exact same instant.
@@ -126,6 +135,16 @@
 ---
 
 ## Español
+
+### ✅ Hecho — Funciones de negocio de alto valor
+- **Diagnóstico técnico** (`RepairOrder.diagnosis`) separado de la falla reportada
+  por el cliente — visible en el detalle, el PDF y la página pública de estado.
+- **Ficha de cliente** (`/admin/clientes/[id]`) con su historial completo de
+  reparaciones y el total pagado.
+- **Búsqueda global** (`/admin/buscar` + barra superior): código, cliente,
+  **teléfono**, **número de serie**, marca y modelo.
+- **Respaldo/exportación de la base de datos** (`/admin/respaldo`): descarga `.db`
+  con fecha en un clic.
 
 ### ✅ Hecho — Inventario, pagos y reportes (según la propuesta académica)
 - **Inventario de repuestos** (`/admin/repuestos`): repuestos con categoría,
@@ -237,9 +256,9 @@
    técnicos — hoy hay alta + cambios de estado/repuestos/pago, pero no pantallas de
    edición o borrado.
 2. **Autenticación** para administración (hoy `/admin` está abierto en la máquina).
-3. **Búsqueda sin acentos** — `LIKE` de SQLite solo ignora mayúsculas ASCII, así que
-   "vasquez" no coincide con "Vásquez".
-4. **Respaldo / exportación** del archivo SQLite (copia en un clic) y reimportación.
+3. **Búsqueda sin acentos** — ya existe la búsqueda global; `LIKE` de SQLite solo
+   ignora mayúsculas ASCII, así que "vasquez" aún no coincide con "Vásquez".
+4. **Restaurar/importar** un respaldo `.db` desde la interfaz (exportar ya existe).
 5. **Reportes más ricos** — rangos de fechas, ingresos por técnico, gráficos por período.
 6. **Seguridad del código de orden** — proteger la (rara) coincidencia si se crean
    dos órdenes en el mismo instante.
