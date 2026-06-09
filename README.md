@@ -24,6 +24,7 @@ solicitudes) y un **lado administrador** (el personal ve y gestiona todas las
 | [`GUIA_PRESENTACION.md`](GUIA_PRESENTACION.md) | Guía de presentación (no técnica) |
 | [`PRESENTATION_CHECKLIST.md`](PRESENTATION_CHECKLIST.md) | Checklist + guion de demo (5 min) |
 | [`DEMO_DATA.md`](DEMO_DATA.md) | Datos de ejemplo recomendados para la demo |
+| [`PRESENTACION_Android_Market.pptx`](PRESENTACION_Android_Market.pptx) | Presentación (PowerPoint, 16 diapositivas, español) |
 
 ---
 
