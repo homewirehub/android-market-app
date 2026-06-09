@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { AdminNav } from "@/components/AdminNav";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { WrenchIcon, ArrowLeftIcon } from "@/components/icons";
+import { WrenchIcon, ArrowLeftIcon, SearchIcon, BoxIcon } from "@/components/icons";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,7 +24,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
         <AdminNav variant="sidebar" />
 
-        <div className="mt-auto border-t border-zinc-200 pt-3 dark:border-zinc-800">
+        <div className="mt-auto space-y-1 border-t border-zinc-200 pt-3 dark:border-zinc-800">
+          <a
+            href="/admin/respaldo"
+            download
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          >
+            <BoxIcon width={18} height={18} />
+            Respaldar datos
+          </a>
           <Link
             href="/"
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
@@ -48,9 +56,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 Admin
               </span>
             </Link>
-            <div className="hidden text-xs font-medium uppercase tracking-wider text-zinc-400 lg:block">
-              Panel de administración
-            </div>
+            {/* Global search */}
+            <form method="get" action="/admin/buscar" className="mx-auto hidden w-full max-w-md sm:block">
+              <div className="relative">
+                <SearchIcon
+                  width={17}
+                  height={17}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                />
+                <input
+                  type="text"
+                  name="q"
+                  placeholder="Buscar cliente, código, teléfono o serie…"
+                  aria-label="Búsqueda global"
+                  className="w-full rounded-lg border border-zinc-200 bg-zinc-50 py-2 pl-9 pr-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </div>
+            </form>
             <ThemeToggle />
           </div>
           {/* Horizontal nav on small screens */}
